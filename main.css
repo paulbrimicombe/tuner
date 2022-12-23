@@ -8,38 +8,45 @@ body {
   padding: 0 1em;
 }
 
-canvas {
-  max-width: 20em;
+body>* {
+  max-width: 100vw;
+}
+
+.header {
+  max-height: 20vh;
+  height: 20vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+canvas#frequencies {
+  height: 40vh;
+  max-height: 40vh;
+  padding: 1em;
 }
 
 .tuner-visualisation {
-  width: 20em;
-  height: 10em;
   position: relative;
   background-color: #506055;
+  display: flex;
+  max-height: 40vh;
+  height: 40vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-#tuner-message {
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  z-index: 1;
+#note {
+  flex: 0;
+  font-size: 2em;
 }
 
-#tuner-message .note {
-  display: block;
+#note .note {
   text-align: center;
 }
 
-#tuner-message .frequency {
-  display: block;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-}
-
-#tuner-message .note .octave {
+#note .octave {
   padding-left: 0.1em;
   font-size: 0.6em;
 }
@@ -49,93 +56,61 @@ canvas {
 }
 
 #tuner-scale {
-  position: absolute;
-  width: 100%;
-  height: 60%;
-  bottom: 20%;
-  --sin-60: 0.866;
-  --cos-60: 0.5;
-  --tan-30: 0.57735;
-  --scale-height: calc(0.6 * 10em);
+  position: relative;
+  width: 80%;
+  flex: 1;
 }
 
-#previous::before {
-  content: 'E';
-  display: block;
+#tuner-scale .label::before {
+  counter-reset: cents var(--tuner-pip);
+  content: counter(cents);
   position: absolute;
   z-index: 1;
-  left: calc(50% - var(--scale-height) * var(--sin-60));
-  bottom: calc(var(--scale-height) * var(--sin-60) * var(--tan-30));
-  transform: translate(-50%, 50%) translate(-1em, calc(-1em * var(--sin-60)));
+  top: 75%;
+  font-size: 0.6em;
+  transform: translate(-50%, -50%);
+  left: calc(50% + (var(--tuner-pip) * 1%));
 }
 
-#previous::after {
+#tuner-scale .pip::after {
   content: "";
   display: block;
   position: absolute;
   border-left: 1px solid;
   z-index: 1;
-  height: 0.5em;
-  left: calc(50% - var(--scale-height) * var(--sin-60));
-  bottom: calc(var(--scale-height) * var(--sin-60) * var(--tan-30));
-  transform: rotate(-60deg);
-  transform-origin: bottom;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: calc(50% + (var(--tuner-pip) * 1%));
+  height: 30%;
 }
 
-#next::before {
-  content: 'F#';
-  display: block;
-  position: absolute;
-  z-index: 1;
-  left: calc(50% + var(--scale-height) * var(--sin-60));
-  bottom: calc(var(--scale-height) * var(--sin-60) * var(--tan-30));
-  transform: translate(-50%, 50%) translate(1em, calc(-1em * var(--sin-60)));
+#tuner-scale .pip.label::after {
+  height: 40%;
 }
 
-#next::after {
-  content: "";
-  display: block;
-  position: absolute;
-  border-left: 1px solid;
-  z-index: 1;
-  height: 0.5em;
-  left: calc(50% + (0.6 * 10em) * 0.866);
-  bottom: calc((0.6 * 10em) * 0.866 * 0.57735);
-  transform: rotate(60deg);
-  transform-origin: bottom;
-}
-
-#this::after {
-  content: "";
-  display: block;
-  position: absolute;
-  border-left: 1px solid;
-  z-index: 1;
-  height: 0.5em;
-  left: 50%;
-  bottom: calc(0.6 * 10em);
+#tuner-scale .pip.fine::after {
+  height: 10%;
 }
 
 #tuner-dial {
-  height: 60%;
+  height: 100%;
   width: 100%;
   position: absolute;
-  bottom: 20%;
-  background-color: #506055;
-  --angle: 0;
+  --tuner-error: 0;
 }
 
 #tuner-dial::after {
   content: "";
-  width: 1px;
-  left: 50%;
-  bottom: 0;
-  height: 90%;
-  border-left: 1px solid #d3eecd;
+  width: 5px;
+  left: calc(50% + (var(--tuner-error) * 100%));
+  top: 50%;
+  height: 43%;
+  border: 1px solid #d21616;
   position: absolute;
-  transform: rotate(calc(var(--angle) * 1deg));
   transform-origin: bottom;
-  transition: 1s ease-out;
+  transform: translate(-50%, -50%);
+  transition: 0.5s ease-out;
+  z-index: 2;
 }
 
 form {
@@ -162,6 +137,7 @@ label {
 
 label:before {
   content: '';
+  pointer-events: none;
   cursor: pointer;
   position: relative;
   width: var(--checkbox-width);
@@ -174,6 +150,7 @@ label:before {
 
 label:after {
   content: '';
+  pointer-events: none;
   cursor: pointer;
   position: absolute;
   left: calc(var(--checkbox-switch-spacing) / 2);
@@ -190,8 +167,4 @@ input:checked+label:before {
 
 input:checked+label:after {
   left: calc(var(--checkbox-switch-spacing) / 2 + var(--checkbox-width) - var(--checkbox-height));
-}
-
-label:active:after {
-  width: 130px;
 }
