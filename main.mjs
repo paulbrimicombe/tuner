@@ -2,6 +2,17 @@
 
 import * as Tuner from "./tuner.mjs";
 
+if (window.location.host !== null && navigator.serviceWorker != null) {
+  navigator.serviceWorker
+    .register("service-worker.js")
+    .then(function (registration) {
+      console.log("Registered events at scope: ", registration.scope);
+    })
+    .catch((error) => {
+      console.error("Failed to register service worker", error);
+    });
+}
+
 const goButton = document.getElementById("go");
 
 if (!goButton) {
