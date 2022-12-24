@@ -2,11 +2,11 @@ var cacheStorageKey = "tuner-v1";
 
 var cachedPaths = [
   "/tuner/",
-  "index.html",
-  "main.css",
-  "main.mjs",
-  "reset.css",
-  "tuner.mjs",
+  "/tuner/index.html",
+  "/tuner/main.css",
+  "/tuner/main.mjs",
+  "/tuner/reset.css",
+  "/tuner/tuner.mjs",
 ];
 
 self.addEventListener("install", (event) => {
