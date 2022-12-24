@@ -1,7 +1,7 @@
 {
   "name": "Reticle tuner",
   "short_name": "Reticle tuner",
-  "display": "fullscreen",
+  "display": "standalone",
   "start_url": "/tuner/",
   "theme_color": "#73c378",
   "background_color": "#333333",
