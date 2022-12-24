@@ -3,8 +3,8 @@
   "short_name": "Chromatic tuner",
   "display": "minimal-ui",
   "start_url": "/tuner/",
-  "theme_color": "lightsteelblue",
-  "background_color": "#fff",
+  "theme_color": "#73c378",
+  "background_color": "#333333",
   "icons": [
     {
       "src": "assets/logo.svg",
@@ -18,7 +18,7 @@
     },
     {
       "src": "assets/maskable_icon.png",
-      "sizes": "512x521",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }

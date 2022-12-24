@@ -9,7 +9,8 @@ const cachedPaths = [
   "/tuner/reset.css",
   "/tuner/tuner.mjs",
   "/tuner/assets/logo.svg",
-  "/tuner/assets/logo-512.png"
+  "/tuner/assets/logo-512.png",
+  "/tuner/assets/maskable_icon.png"
 ];
 
 self.addEventListener("install", (event) => {
