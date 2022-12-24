@@ -1,6 +1,6 @@
-var cacheStorageKey = "tuner-v1.0.1";
+const cacheStorageKey = "tuner-v1.0.1";
 
-var cachedPaths = [
+const cachedPaths = [
   "/tuner/",
   "/tuner/index.html",
   "/tuner/main.css",
