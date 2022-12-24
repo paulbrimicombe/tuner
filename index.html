@@ -17,67 +17,69 @@
     <script src="main.mjs" type="module"></script>
   </head>
   <body>
-    <section class="header">
-      <h1>
-        <img
-          class="logo"
-          src="assets/logo.svg"
-          alt="Tuner logo"
-          width="128"
-          height="128"
-        /><span>Reticle Tuner</span>
-      </h1>
-      <form>
-        <input type="checkbox" id="go" />
-        <label id="go-label" for="go">On / Off</label>
-      </form>
-    </section>
-    <div class="tuner-visualisation">
-      <div id="note">
-        <span class="note">&nbsp;</span><sup class="octave">&nbsp;</sup>
+    <main id="#tuner">
+      <section class="header">
+        <h1>
+          <img
+            class="logo"
+            src="assets/logo.svg"
+            alt="Tuner logo"
+            width="128"
+            height="128"
+          /><span>Reticle Tuner</span>
+        </h1>
+        <form>
+          <input type="checkbox" id="go" />
+          <label id="go-label" for="go">On / Off</label>
+        </form>
+      </section>
+      <div class="tuner-visualisation">
+        <div id="note">
+          <span class="note">&nbsp;</span><sup class="octave">&nbsp;</sup>
+        </div>
+        <div id="tuner-scale">
+          <div id="tuner-dial"></div>
+          <span class="pip label" style="--tuner-pip: -50"></span>
+          <span class="pip" style="--tuner-pip: -45"></span>
+          <span class="pip label" style="--tuner-pip: -40"></span>
+          <span class="pip" style="--tuner-pip: -35"></span>
+          <span class="pip label" style="--tuner-pip: -30"></span>
+          <span class="pip" style="--tuner-pip: -25"></span>
+          <span class="pip label" style="--tuner-pip: -20"></span>
+          <span class="pip" style="--tuner-pip: -15"></span>
+          <span class="pip label" style="--tuner-pip: -10"></span>
+          <span class="pip fine" style="--tuner-pip: -9"></span>
+          <span class="pip fine" style="--tuner-pip: -8"></span>
+          <span class="pip fine" style="--tuner-pip: -7"></span>
+          <span class="pip fine" style="--tuner-pip: -6"></span>
+          <span class="pip" style="--tuner-pip: -5"></span>
+          <span class="pip fine" style="--tuner-pip: -4"></span>
+          <span class="pip fine" style="--tuner-pip: -3"></span>
+          <span class="pip fine" style="--tuner-pip: -2"></span>
+          <span class="pip fine" style="--tuner-pip: -1"></span>
+          <span class="pip label" style="--tuner-pip: 0"></span>
+          <span class="pip fine" style="--tuner-pip: 1"></span>
+          <span class="pip fine" style="--tuner-pip: 2"></span>
+          <span class="pip fine" style="--tuner-pip: 3"></span>
+          <span class="pip fine" style="--tuner-pip: 4"></span>
+          <span class="pip" style="--tuner-pip: 5"></span>
+          <span class="pip fine" style="--tuner-pip: 6"></span>
+          <span class="pip fine" style="--tuner-pip: 7"></span>
+          <span class="pip fine" style="--tuner-pip: 8"></span>
+          <span class="pip fine" style="--tuner-pip: 9"></span>
+          <span class="pip label" style="--tuner-pip: 10"></span>
+          <span class="pip" style="--tuner-pip: 15"></span>
+          <span class="pip label" style="--tuner-pip: 20"></span>
+          <span class="pip" style="--tuner-pip: 25"></span>
+          <span class="pip label" style="--tuner-pip: 30"></span>
+          <span class="pip" style="--tuner-pip: 35"></span>
+          <span class="pip label" style="--tuner-pip: 40"></span>
+          <span class="pip" style="--tuner-pip: 45"></span>
+          <span class="pip label" style="--tuner-pip: 50"></span>
+        </div>
+        <div id="frequency"><span class="error">&nbsp;</span></div>
       </div>
-      <div id="tuner-scale">
-        <div id="tuner-dial"></div>
-        <span class="pip label" style="--tuner-pip: -50"></span>
-        <span class="pip" style="--tuner-pip: -45"></span>
-        <span class="pip label" style="--tuner-pip: -40"></span>
-        <span class="pip" style="--tuner-pip: -35"></span>
-        <span class="pip label" style="--tuner-pip: -30"></span>
-        <span class="pip" style="--tuner-pip: -25"></span>
-        <span class="pip label" style="--tuner-pip: -20"></span>
-        <span class="pip" style="--tuner-pip: -15"></span>
-        <span class="pip label" style="--tuner-pip: -10"></span>
-        <span class="pip fine" style="--tuner-pip: -9"></span>
-        <span class="pip fine" style="--tuner-pip: -8"></span>
-        <span class="pip fine" style="--tuner-pip: -7"></span>
-        <span class="pip fine" style="--tuner-pip: -6"></span>
-        <span class="pip" style="--tuner-pip: -5"></span>
-        <span class="pip fine" style="--tuner-pip: -4"></span>
-        <span class="pip fine" style="--tuner-pip: -3"></span>
-        <span class="pip fine" style="--tuner-pip: -2"></span>
-        <span class="pip fine" style="--tuner-pip: -1"></span>
-        <span class="pip label" style="--tuner-pip: 0"></span>
-        <span class="pip fine" style="--tuner-pip: 1"></span>
-        <span class="pip fine" style="--tuner-pip: 2"></span>
-        <span class="pip fine" style="--tuner-pip: 3"></span>
-        <span class="pip fine" style="--tuner-pip: 4"></span>
-        <span class="pip" style="--tuner-pip: 5"></span>
-        <span class="pip fine" style="--tuner-pip: 6"></span>
-        <span class="pip fine" style="--tuner-pip: 7"></span>
-        <span class="pip fine" style="--tuner-pip: 8"></span>
-        <span class="pip fine" style="--tuner-pip: 9"></span>
-        <span class="pip label" style="--tuner-pip: 10"></span>
-        <span class="pip" style="--tuner-pip: 15"></span>
-        <span class="pip label" style="--tuner-pip: 20"></span>
-        <span class="pip" style="--tuner-pip: 25"></span>
-        <span class="pip label" style="--tuner-pip: 30"></span>
-        <span class="pip" style="--tuner-pip: 35"></span>
-        <span class="pip label" style="--tuner-pip: 40"></span>
-        <span class="pip" style="--tuner-pip: 45"></span>
-        <span class="pip label" style="--tuner-pip: 50"></span>
-      </div>
-      <div id="frequency"><span class="error">&nbsp;</span></div>
-    </div>
-    <canvas width="1024" height="400" id="frequencies"></canvas>
+      <canvas width="1024" height="400" id="frequencies"></canvas>
+    </main>
   </body>
 </html>
