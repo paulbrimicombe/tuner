@@ -1,0 +1,61 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <defs>
+    <style class="style-fonts">
+      @font-face {
+        font-family: "Virgil";
+        src: url("https://excalidraw.com/Virgil.woff2");
+      }
+
+      @font-face {
+        font-family: "Cascadia";
+        src: url("https://excalidraw.com/Cascadia.woff2");
+      }
+    </style>
+  </defs>
+  <g stroke-linecap="round" transform="translate(10 10) rotate(0 40 40)">
+    <path
+      d="M20 0 L64.69 0.31 L72.19 2.81 L77.19 7.81 L78.75 11.25 L80 20 L79.69 64.69 L77.19 72.19 L72.19 77.19 L64.69 79.69 L60 80 L15.31 79.69 L7.81 77.19 L2.81 72.19 L0.31 64.69 L0 60 L0 20 L1.25 11.25 L2.81 7.81 L7.81 2.81 L15.31 0.31 L20 0"
+      stroke="none" stroke-width="0" fill="#3d423f"></path>
+    <path
+      d="M20 0 M20 0 C28.32 0, 36.64 0, 60 0 M20 0 C34.08 0, 48.17 0, 60 0 M60 0 C73.33 0, 80 6.67, 80 20 M60 0 C73.33 0, 80 6.67, 80 20 M80 20 C80 35.95, 80 51.91, 80 60 M80 20 C80 35.72, 80 51.43, 80 60 M80 60 C80 73.33, 73.33 80, 60 80 M80 60 C80 73.33, 73.33 80, 60 80 M60 80 C44.66 80, 29.33 80, 20 80 M60 80 C46.2 80, 32.39 80, 20 80 M20 80 C6.67 80, 0 73.33, 0 60 M20 80 C6.67 80, 0 73.33, 0 60 M0 60 C0 44.6, 0 29.21, 0 20 M0 60 C0 47.22, 0 34.43, 0 20 M0 20 C0 6.67, 6.67 0, 20 0 M0 20 C0 6.67, 6.67 0, 20 0"
+      stroke="#73c378" stroke-width="4" fill="none"></path>
+  </g>
+  <g stroke-linecap="round">
+    <g transform="translate(50 30) rotate(0 0 20)">
+      <path d="M0 0 C0 6.67, 0 33.33, 0 40 M0 0 C0 6.67, 0 33.33, 0 40" stroke="#fff" stroke-width="4" fill="none">
+      </path>
+    </g>
+  </g>
+  <mask></mask>
+  <g stroke-linecap="round">
+    <g transform="translate(74 30) rotate(0 0 20)">
+      <path d="M0 0 C0 6.67, 0 33.33, 0 40 M0 0 C0 6.67, 0 33.33, 0 40" stroke="#fff" stroke-width="4" fill="none">
+      </path>
+    </g>
+  </g>
+  <mask></mask>
+  <g stroke-linecap="round">
+    <g transform="translate(26 30) rotate(0 0 20)">
+      <path d="M0 0 C0 6.67, 0 33.33, 0 40 M0 0 C0 6.67, 0 33.33, 0 40" stroke="#fff" stroke-width="4" fill="none">
+      </path>
+    </g>
+  </g>
+  <mask></mask>
+  <g stroke-linecap="round">
+    <g transform="translate(38 38) rotate(0 0 12)">
+      <path d="M0 0 C0 4, 0 20, 0 24 M0 0 C0 4, 0 20, 0 24" stroke="#fff" stroke-width="4" fill="none"></path>
+    </g>
+  </g>
+  <mask></mask>
+  <g stroke-linecap="round">
+    <g transform="translate(62 38) rotate(0 0 12)">
+      <path d="M0 0 C0 4, 0 20, 0 24 M0 0 C0 4, 0 20, 0 24" stroke="#fff" stroke-width="4" fill="none"></path>
+    </g>
+  </g>
+  <mask></mask>
+  <g stroke-linecap="round" transform="translate(46 26) rotate(0 4 24)">
+    <path
+      d="M2 0 M2 0 C3.54 0, 5.08 0, 6 0 M2 0 C3.03 0, 4.06 0, 6 0 M6 0 C7.33 0, 8 0.67, 8 2 M6 0 C7.33 0, 8 0.67, 8 2 M8 2 C8 11.37, 8 20.73, 8 46 M8 2 C8 16.62, 8 31.25, 8 46 M8 46 C8 47.33, 7.33 48, 6 48 M8 46 C8 47.33, 7.33 48, 6 48 M6 48 C4.56 48, 3.13 48, 2 48 M6 48 C5 48, 3.99 48, 2 48 M2 48 C0.67 48, 0 47.33, 0 46 M2 48 C0.67 48, 0 47.33, 0 46 M0 46 C0 33.78, 0 21.55, 0 2 M0 46 C0 36.38, 0 26.75, 0 2 M0 2 C0 0.67, 0.67 0, 2 0 M0 2 C0 0.67, 0.67 0, 2 0"
+      stroke="#fd3e3e" stroke-width="4" fill="none"></path>
+  </g>
+</svg>

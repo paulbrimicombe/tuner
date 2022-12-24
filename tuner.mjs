@@ -8,18 +8,31 @@ const NOTE_STRINGS = [
   "C",
   "C♯",
   "D",
-  "D♯",
+  "E♭",
   "E",
   "F",
   "F♯",
   "G",
   "G♯",
   "A",
-  "A♯",
+  "B♭",
   "B",
 ];
 
 /** @typedef {{noteString: string, octaveNumber: number, frequency: number, error: number}} Note */
+
+/**
+ * @returns {Promise<{ release: () => void }  | undefined>}
+ */
+const requestWakeLock = async () => {
+  try {
+    // @ts-ignore
+    return await navigator.wakeLock.request();
+  } catch (err) {
+    console.log(`Unable to keep screen awake: ${err.name}, ${err.message}`);
+    return;
+  }
+};
 
 /**
  * @param {number[] | Uint8Array} data
@@ -132,27 +145,61 @@ const findPeaks = (data, thresholdFactor) => {
   }, []);
 };
 
-/** @param {HTMLCanvasElement} tunerCanvas */
-export const create = (tunerCanvas) => {
-  let stopped = false;
-  let timer = null;
+/** @typedef {{
+ *   sampleRate: number,
+ *   audioContext: AudioContext,
+ *   audioAnalyser: AnalyserNode,
+ *   timer?: number,
+ *   mediaStream: MediaStream
+ *   wakeLock?: { release: () => void},
+ * }} TunerState
+ */
 
-  /** @param {(note: Note | null) => void} onNote */
-  const start = async (onNote) => {
-    stopped = false;
-    clearInterval(timer);
-    timer = null;
+/** @returns {Promise<TunerState>} */
+const createTunerState = async () => {
+  const audioContext = new window.AudioContext();
 
-    const audioContext = new window.AudioContext();
+  try {
+    const sampleRate = audioContext.sampleRate;
     const audioAnalyser = audioContext.createAnalyser();
     audioAnalyser.minDecibels = -100;
     audioAnalyser.maxDecibels = -10;
     audioAnalyser.smoothingTimeConstant = 0.85;
     audioAnalyser.fftSize = 4096;
 
+    const wakeLock = await requestWakeLock();
+
     const constraints = { audio: true };
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    const audioSource = audioContext.createMediaStreamSource(stream);
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    return {
+      audioContext,
+      audioAnalyser,
+      sampleRate,
+      mediaStream,
+      wakeLock,
+    };
+  } catch (error) {
+    audioContext.close();
+    throw error;
+  }
+};
+
+/** @param {HTMLCanvasElement} tunerCanvas */
+export const create = (tunerCanvas) => {
+  /** @type TunerState | null */
+  let tunerState = null;
+
+  /** @param {(note: Note | null) => void} onNote */
+  const start = async (onNote) => {
+    if (tunerState) {
+      stop();
+    }
+
+    tunerState = await createTunerState();
+
+    const { audioContext, audioAnalyser, mediaStream, sampleRate } = tunerState;
+
+    const audioSource = audioContext.createMediaStreamSource(mediaStream);
     audioSource.connect(audioAnalyser);
 
     const frequencyAnalysis = new Uint8Array(audioAnalyser.frequencyBinCount);
@@ -168,12 +215,12 @@ export const create = (tunerCanvas) => {
       const indicesToTest = new Set();
       estimates.forEach((frequency) => {
         const startOffset = Math.max(
-          Math.floor(audioContext.sampleRate / frequency) - testFrequencyRange,
+          Math.floor(sampleRate / frequency) - testFrequencyRange,
           0
         );
         const endOffset = Math.min(
-          Math.ceil(audioContext.sampleRate / frequency) + testFrequencyRange,
-          audioContext.sampleRate / 2
+          Math.ceil(sampleRate / frequency) + testFrequencyRange,
+          sampleRate / 2
         );
         for (let i = startOffset; i <= endOffset; i++) {
           indicesToTest.add(i);
@@ -184,9 +231,10 @@ export const create = (tunerCanvas) => {
         ...indicesToTest,
       ]);
 
-      const keyMaxima = findPeaks(correlation, KEY_MAXIMUM_CUT_OFF);
-      const frequency =
-        keyMaxima[0] > 0 ? audioContext.sampleRate / keyMaxima[0] : null;
+      const keyMaxima = findPeaks(correlation, KEY_MAXIMUM_CUT_OFF).filter(
+        (maximum) => maximum > 0
+      );
+      const frequency = keyMaxima[0] ? sampleRate / keyMaxima[0] : null;
       const note = createNote(frequency);
       onNote(note);
     };
@@ -198,14 +246,13 @@ export const create = (tunerCanvas) => {
     }
 
     const drawFrequencies = () => {
-      if (stopped) {
+      if (!tunerState) {
         return;
       }
       canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
       audioAnalyser.getByteFrequencyData(frequencyAnalysis);
 
-      const frequencyBucketWidth =
-        audioContext.sampleRate / 2 / frequencyAnalysis.length;
+      const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
       const maxInterestingBucket = Math.ceil(
         MAX_INTERESTING_FREQUENCY / frequencyBucketWidth
       );
@@ -260,7 +307,7 @@ export const create = (tunerCanvas) => {
         frequencyAnalysis,
         PEAK_VALUE_FILTER_VALUE
       );
-      const maxFrequency = audioContext.sampleRate / 2;
+      const maxFrequency = sampleRate / 2;
       const buckets = audioAnalyser.fftSize / 2;
       const bucketWidth = maxFrequency / buckets;
 
@@ -269,8 +316,8 @@ export const create = (tunerCanvas) => {
       );
       findNote(peakFrequencies, 10);
 
-      if (!stopped) {
-        timer = setTimeout(updateNote, 200);
+      if (tunerState) {
+        tunerState.timer = setTimeout(updateNote, 200);
       }
     };
 
@@ -279,8 +326,19 @@ export const create = (tunerCanvas) => {
   };
 
   const stop = () => {
-    clearTimeout(timer);
-    stopped = true;
+    if (tunerState) {
+      try {
+        if (tunerState.timer) {
+          clearTimeout(tunerState.timer);
+        }
+
+        tunerState.wakeLock?.release();
+        tunerState.audioContext.close();
+        tunerState.mediaStream.getTracks().forEach((track) => track.stop());
+      } finally {
+        tunerState = null;
+      }
+    }
   };
 
   return {

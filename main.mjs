@@ -3,9 +3,7 @@
 // TODO:
 // - Make installable (icons)
 // - Check tuning algorithm against different instruments
-// - Improve dial contrast
 // - Better display of error cents
-// - Release audio context when stopped
 
 import * as Tuner from "./tuner.mjs";
 
@@ -63,29 +61,17 @@ const tuner = Tuner.create(tunerCanvas);
  */
 const onNote = (note) => {
   if (note === null) {
+    noteSpan.textContent = "-";
+    octaveSup.textContent = "\xa0";
+    errorSpan.textContent = "\xa0";
     return;
   }
 
-  const { noteString, octaveNumber, frequency, error } = note;
-  // messageDiv.innerHTML = "";
-  // const noteSpan = document.createElement("span");
-  // noteSpan.classList.add("note");
-  // const octaveSup = document.createElement("sup");
-  // octaveSup.classList.add("octave");
-  // const frequencySpan = document.createElement("span");
-  // frequencySpan.classList.add("frequency");
-  // const errorSpan = document.createElement("span");
-  // errorSpan.classList.add("error");
+  const { noteString, octaveNumber, error } = note;
 
   noteSpan.textContent = noteString;
-  octaveSup.innerText = octaveNumber.toString();
-  // frequencySpan.innerText = `${Math.round(frequency)}Hz`;
-  errorSpan.innerText = `${Math.round(100 * 100 * error) / 100.0}`;
-
-  // noteSpan.appendChild(octaveSup);
-  // messageDiv.appendChild(noteSpan);
-  // messageDiv.appendChild(frequencySpan);
-  // messageDiv.appendChild(errorSpan);
+  octaveSup.textContent = octaveNumber.toString();
+  errorSpan.textContent = `${Math.round(100 * 100 * error) / 100.0}`;
 
   if (dialDiv && !Number.isNaN(error)) {
     dialDiv.style.setProperty("--tuner-error", String(error));
@@ -97,5 +83,6 @@ goButton.onchange = (event) => {
     tuner.start(onNote);
   } else {
     tuner.stop();
+    onNote(null);
   }
 };

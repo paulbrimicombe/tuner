@@ -7,18 +7,26 @@
       content="A chromatic tuner for musical instruments."
     />
     <meta charset="utf-8" />
-    <meta name="theme-color" content="lightsteelblue" />
+    <meta name="theme-color" content="#73c378" />
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/assets/logo-512.png" />
-    <title>Tuner</title>
+    <link rel="apple-touch-icon" href="assets/logo-512.png" />
+    <title>Reticle Tuner</title>
     <link rel="stylesheet" type="text/css" media="screen" href="reset.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
     <script src="main.mjs" type="module"></script>
   </head>
   <body>
     <section class="header">
-      <h1>Tuner</h1>
+      <h1>
+        <img
+          class="logo"
+          src="assets/logo.svg"
+          alt="Tuner logo"
+          width="128"
+          height="128"
+        /><span>Reticle Tuner</span>
+      </h1>
       <form>
         <input type="checkbox" id="go" />
         <label id="go-label" for="go">On / Off</label>
