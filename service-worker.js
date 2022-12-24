@@ -10,7 +10,7 @@ const cachedPaths = [
   "/tuner/tuner.mjs",
   "/tuner/assets/logo.svg",
   "/tuner/assets/logo-512.png",
-  "/tuner/assets/maskable_icon.png"
+  "/tuner/assets/maskable_icon.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -30,7 +30,8 @@ self.addEventListener("activate", (event) => {
         .map((name) => caches.delete(name))
     );
     await self.clients.claim();
-  };
+    self.clients.map((client) => client.navigate(client.url));
+  }; 
   event.waitUntil(activate());
 });
 
