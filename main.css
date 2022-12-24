@@ -28,7 +28,7 @@ canvas#frequencies {
 
 .tuner-visualisation {
   position: relative;
-  background-color: #506055;
+  background-color: #50605555;
   display: flex;
   max-height: 40vh;
   height: 40vh;
@@ -66,8 +66,8 @@ canvas#frequencies {
   content: counter(cents);
   position: absolute;
   z-index: 1;
-  top: 75%;
-  font-size: 0.6em;
+  top: 78%;
+  font-size: 0.7em;
   transform: translate(-50%, -50%);
   left: calc(50% + (var(--tuner-pip) * 1%));
 }
@@ -76,7 +76,7 @@ canvas#frequencies {
   content: "";
   display: block;
   position: absolute;
-  border-left: 1px solid;
+  border-left: 2px solid;
   z-index: 1;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -90,6 +90,7 @@ canvas#frequencies {
 
 #tuner-scale .pip.fine::after {
   height: 10%;
+  border-width: 1px;
 }
 
 #tuner-dial {
@@ -101,16 +102,17 @@ canvas#frequencies {
 
 #tuner-dial::after {
   content: "";
-  width: 5px;
+  width: 10px;
   left: calc(50% + (var(--tuner-error) * 100%));
   top: 50%;
-  height: 43%;
-  border: 1px solid #d21616;
+  height: 44%;
+  border: 2px solid #fd3e3e;
+  border-radius: 2px;
   position: absolute;
   transform-origin: bottom;
   transform: translate(-50%, -50%);
   transition: 0.5s ease-out;
-  z-index: 2;
+  z-index: 1;
 }
 
 form {

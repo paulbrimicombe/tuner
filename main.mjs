@@ -1,5 +1,12 @@
 // @ts-check
 
+// TODO:
+// - Make installable (icons)
+// - Check tuning algorithm against different instruments
+// - Improve dial contrast
+// - Better display of error cents
+// - Release audio context when stopped
+
 import * as Tuner from "./tuner.mjs";
 
 if (window.location.host !== null && navigator.serviceWorker != null) {
