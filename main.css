@@ -81,7 +81,7 @@ canvas#frequencies {
   position: absolute;
   z-index: 1;
   bottom: 0;
-  font-size: 0.7em;
+  font-size: 0.75em;
   transform: translate(-50%, 0);
   left: calc(50% + (var(--tuner-pip) * 1%));
 }
@@ -119,7 +119,7 @@ canvas#frequencies {
   width: 10px;
   left: calc(50% + (var(--tuner-error) * 100%));
   top: 50%;
-  height: calc(100% - 2 * 1em + 5px);
+  height: calc(100% - 2 * 1em + 3px);
   border: 2px solid #fd3e3e;
   border-radius: 2px;
   position: absolute;
