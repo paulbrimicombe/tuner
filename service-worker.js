@@ -1,4 +1,4 @@
-var cacheStorageKey = "tuner-v1";
+var cacheStorageKey = "tuner-v1.0.1";
 
 var cachedPaths = [
   "/tuner/",
