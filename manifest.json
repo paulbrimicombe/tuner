@@ -1,6 +1,6 @@
 {
-  "name": "Chromatic tuner",
-  "short_name": "Chromatic tuner",
+  "name": "Reticle tuner",
+  "short_name": "Reticle tuner",
   "display": "fullscreen",
   "start_url": "/tuner/",
   "theme_color": "#73c378",
