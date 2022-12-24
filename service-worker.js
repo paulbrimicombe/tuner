@@ -30,8 +30,10 @@ self.addEventListener("activate", (event) => {
         .map((name) => caches.delete(name))
     );
     await self.clients.claim();
-    self.clients.map((client) => client.navigate(client.url));
-  }; 
+    await self.clients
+      .matchAll({ includeUncontrolled: true })
+      .then((clients) => clients.map((client) => client.navigate(client.url)));
+  };
   event.waitUntil(activate());
 });
 
