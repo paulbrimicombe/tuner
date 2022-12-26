@@ -18,14 +18,14 @@ self.oninstall = (event) => {
     caches.open(CACHE_STORAGE_KEY).then(async (cache) => {
       await cache.addAll(cachedPaths);
       await cache.add("/tuner");
-      await serviceWorker.skipWaiting();
+      await self.skipWaiting();
     })
   );
 };
 
 self.onactivate = (event) => {
   event.waitUntil(
-    serviceWorker.clients
+    self.clients
       .matchAll({
         includeUncontrolled: true,
       })
@@ -35,7 +35,7 @@ self.onactivate = (event) => {
         for (const key of cacheKeys) {
           if (key !== CACHE_STORAGE_KEY) await caches.delete(key);
         }
-        await serviceWorker.clients.claim();
+        await self.clients.claim();
         // Hard-refresh clients
         clients.map((client) => client.navigate(client.url));
       })
