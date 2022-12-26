@@ -1,4 +1,4 @@
-const cacheStorageKey = "tuner-v1.0.3";
+const CACHE_STORAGE_KEY = "tuner-v1.0.4";
 
 const cachedPaths = [
   "/tuner/",
@@ -13,29 +13,34 @@ const cachedPaths = [
   "/tuner/assets/maskable_icon.png",
 ];
 
-self.addEventListener("install", (event) => {
-  const install = async () => {
-    const cache = await caches.open(cacheStorageKey);
-    await cache.addAll(cachedPaths);
-  };
-  event.waitUntil(install());
-});
+self.oninstall = (event) => {
+  event.waitUntil(
+    caches.open(CACHE_STORAGE_KEY).then(async (cache) => {
+      await cache.addAll(cachedPaths);
+      await cache.add("/tuner");
+      await serviceWorker.skipWaiting();
+    })
+  );
+};
 
-self.addEventListener("activate", (event) => {
-  const activate = async () => {
-    const cacheNames = await caches.keys();
-    await Promise.all(
-      cacheNames
-        .filter((name) => name !== cacheStorageKey)
-        .map((name) => caches.delete(name))
-    );
-    await self.clients.claim();
-    await self.clients
-      .matchAll({ includeUncontrolled: true })
-      .then((clients) => clients.map((client) => client.navigate(client.url)));
-  };
-  event.waitUntil(activate());
-});
+self.onactivate = (event) => {
+  event.waitUntil(
+    serviceWorker.clients
+      .matchAll({
+        includeUncontrolled: true,
+      })
+      .then(async (clients) => {
+        const cacheKeys = await caches.keys();
+        // delete old caches
+        for (const key of cacheKeys) {
+          if (key !== CACHE_STORAGE_KEY) await caches.delete(key);
+        }
+        await serviceWorker.clients.claim();
+        // Hard-refresh clients
+        clients.map((client) => client.navigate(client.url));
+      })
+  );
+};
 
 self.addEventListener("fetch", async (event) => {
   const response = caches.match(event.request);
