@@ -169,7 +169,13 @@ const createTunerState = async () => {
 
     const wakeLock = await requestWakeLock();
 
-    const constraints = { audio: true };
+    const constraints = {
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: true,
+      },
+    };
     const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     return {
       audioContext,

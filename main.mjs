@@ -1,10 +1,5 @@
 // @ts-check
 
-// TODO:
-// - Make installable (icons)
-// - Check tuning algorithm against different instruments
-// - Better display of error cents
-
 import * as Tuner from "./tuner.mjs";
 
 if (window.location.host !== null && navigator.serviceWorker != null) {
