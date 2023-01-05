@@ -20,6 +20,14 @@ if (!dialDiv) {
   throw new Error("No dial found!");
 }
 
+const flatDiv = document.querySelector("#lights .flat");
+const sharpDiv = document.querySelector("#lights .sharp");
+const inTuneDiv = document.querySelector("#lights .in-tune");
+
+if (!flatDiv || !sharpDiv || !inTuneDiv) {
+  throw new Error("One or more tuning lights not found!");
+}
+
 const tunerCanvas = document.getElementById("frequencies");
 
 if (!(tunerCanvas instanceof HTMLCanvasElement)) {
@@ -38,12 +46,6 @@ if (!(octaveSup instanceof HTMLElement)) {
   throw new Error("No note octave number container found!");
 }
 
-const errorSpan = document.querySelector("#frequency .error");
-
-if (!(errorSpan instanceof HTMLElement)) {
-  throw new Error("No note error frequency container found!");
-}
-
 const tuner = Tuner.create(tunerCanvas);
 
 /**
@@ -53,7 +55,6 @@ const onNote = (note) => {
   if (note === null) {
     noteSpan.textContent = "-";
     octaveSup.textContent = "\xa0";
-    errorSpan.textContent = "\xa0";
     return;
   }
 
@@ -61,10 +62,23 @@ const onNote = (note) => {
 
   noteSpan.textContent = noteString;
   octaveSup.textContent = octaveNumber.toString();
-  errorSpan.textContent = `${Math.round(100 * 100 * error) / 100.0}`;
 
   if (dialDiv && !Number.isNaN(error)) {
     dialDiv.style.setProperty("--tuner-error", String(error));
+
+    flatDiv.classList.remove("on");
+    sharpDiv.classList.remove("on");
+    inTuneDiv.classList.remove("on");
+
+    if (error < -0.01) {
+      flatDiv.classList.add("on");
+    } else if (error > 0.01) {
+      sharpDiv.classList.add("on");
+    }
+
+    if (Math.abs(error) < 0.02) {
+      inTuneDiv.classList.add("on");
+    }
   }
 };
 

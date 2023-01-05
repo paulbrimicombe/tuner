@@ -50,12 +50,20 @@ canvas#frequencies {
   height: 40vh;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
+  gap: 0.5em;
 }
 
 #note {
   flex: 0;
   font-size: 2em;
+  font-size: max(calc((40vh - 8em) * 0.3), 2em);
+  box-shadow: 0 0 1px #fffa inset;
+  width: 2em;
+  margin-top: 0.2em;
+  text-align: center;
+  background-color: #506055;
+  border-radius: 0.1em;
 }
 
 #note .note {
@@ -130,6 +138,29 @@ canvas#frequencies {
   transform: translate(-50%, -50%);
   transition: 0.5s ease-out;
   z-index: 1;
+}
+
+#lights {
+  display: flex;
+  gap: 1em;
+  min-height: 1.5em;
+}
+
+#lights .light {
+  width: 1em;
+  height: 1em;
+  border-radius: 0.5em;
+  background-color: transparent;
+  box-shadow: 0 0 3px #fffd;
+  transition: background-color 0.5s ease-out;
+}
+
+#lights .light.on {
+  background-color: #fdb73edd;
+}
+
+#lights .light.on.in-tune {
+  background-color: #3efd94dd;
 }
 
 form {

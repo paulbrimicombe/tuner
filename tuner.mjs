@@ -3,6 +3,7 @@
 const MAX_INTERESTING_FREQUENCY = 10_000;
 const PEAK_VALUE_FILTER_VALUE = 0.5;
 const KEY_MAXIMUM_CUT_OFF = 0.8;
+const NOTE_UPDATE_PERIOD = 100;
 
 const NOTE_STRINGS = [
   "C",
@@ -323,7 +324,7 @@ export const create = (tunerCanvas) => {
       findNote(peakFrequencies, 10);
 
       if (tunerState) {
-        tunerState.timer = setTimeout(updateNote, 200);
+        tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD);
       }
     };
 
