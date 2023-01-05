@@ -53,8 +53,12 @@ const tuner = Tuner.create(tunerCanvas);
  */
 const onNote = (note) => {
   if (note === null) {
-    noteSpan.textContent = "-";
+    noteSpan.textContent = "\xa0";
     octaveSup.textContent = "\xa0";
+    dialDiv.style.setProperty("--tuner-error", String(0));
+    sharpDiv.classList.remove("on");
+    inTuneDiv.classList.remove("on");
+    flatDiv.classList.remove("on");
     return;
   }
 
