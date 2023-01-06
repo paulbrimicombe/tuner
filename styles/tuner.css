@@ -1,44 +1,5 @@
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #333333;
-  color: rgb(255, 255, 255);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-  padding: 0 1em;
-  max-width: 100vw;
-}
-
-main {
-  max-width: 40em;
-  width: 100%;
-}
-
-.logo {
-  height: 100%;
-  width: 1.5em;
-  margin-right: 0.3em;
-}
-
-h1 {
-  display: flex;
-  align-items: center;
-}
-
-.header {
-  max-height: 20vh;
-  min-height: 3.5em;
-  height: 20vh;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  flex-direction: column;
-  gap: 1em;
-}
-
 canvas#frequencies {
-  height: 40vh;
+  flex: 2;
   max-height: 40vh;
   padding: 1em;
   width: 100%;
@@ -46,12 +7,12 @@ canvas#frequencies {
 
 .tuner-visualisation {
   position: relative;
-  background-color: #50605555;
-  box-shadow: -1px 1px 1px rgb(0 0 0 / 8%) inset, -1px 1px 1px #fafafa44;
+  background-color: #3d423f;
+  box-shadow: 0px 0px 1px black inset;
   display: flex;
   max-height: 40vh;
-  height: 40vh;
-  border-radius: 0.2em;
+  flex: 2;
+  border-radius: 1em;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
@@ -68,7 +29,7 @@ canvas#frequencies {
   text-align: center;
   border-radius: 0.1em;
   background-color: #ddd;
-  box-shadow: -1px 1px 1px rgb(0 0 0 / 8%) inset, -1px 1px 1px #fafafa;
+  box-shadow: 0 0 1px black inset;
   color: #272e38;
 }
 
@@ -109,7 +70,7 @@ canvas#frequencies {
   content: "";
   display: block;
   position: absolute;
-  border-left: 2px solid;
+  border-left: 2px solid #eee;
   z-index: 1;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -158,17 +119,38 @@ canvas#frequencies {
   width: 1em;
   height: 1em;
   border-radius: 0.5em;
-  background-color: transparent;
-  box-shadow: 0 0 3px #fffd;
-  transition: background-color 0.5s ease-out;
+  box-shadow: 0 0 3px #fff9 inset, 0 0 1px #fffd;
+  background-color: #ccc7;
 }
 
-#lights .light.on {
-  background-color: #fdb73edd;
+#lights .light {
+  --light-colour: #fdb73e;
 }
 
-#lights .light.on.in-tune {
-  background-color: #3efd94dd;
+#lights .light.in-tune {
+  --light-colour: #73c378;
+}
+
+#lights .light::after {
+  content: "";
+  opacity: 0;
+  width: 1em;
+  height: 1em;
+  border-radius: 0.5em;
+  transition: opacity 0.5s linear;
+  box-shadow:
+    0 0 1px var(--light-colour) inset,
+    0 0 2px var(--light-colour),
+    0 0 5px var(--light-colour),
+    0 0 6px var(--light-colour),
+    0 0 7px var(--light-colour),
+    0 0 8px var(--light-colour);
+  background-color: var(--light-colour);
+  position: absolute;
+}
+
+#lights .light.on::after {
+  opacity: 1;
 }
 
 form {
@@ -214,7 +196,7 @@ label:after {
   left: calc(var(--checkbox-switch-spacing) / 2);
   width: calc(var(--checkbox-height) - var(--checkbox-switch-spacing));
   height: calc(var(--checkbox-height) - var(--checkbox-switch-spacing));
-  background: #fff;
+  background: #eee;
   border-radius: calc(var(--checkbox-height) / 2);
   transition: 0.3s;
 }

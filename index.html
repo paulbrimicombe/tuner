@@ -11,9 +11,10 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="assets/logo-512.png" />
-    <title>Reticle Tuner</title>
-    <link rel="stylesheet" type="text/css" media="screen" href="reset.css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <title>Tuner</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/reset.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/main.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/tuner.css" />
     <script src="main.mjs" type="module"></script>
   </head>
   <body>
@@ -23,10 +24,10 @@
           <img
             class="logo"
             src="assets/logo.svg"
-            alt="Tuner logo"
+            alt="Tunicle logo"
             width="128"
             height="128"
-          /><span>Reticle Tuner</span>
+          /><span>Tunicle</span>
         </h1>
         <form>
           <input type="checkbox" id="go" />
@@ -84,6 +85,9 @@
         </div>
       </div>
       <canvas width="1024" height="400" id="frequencies"></canvas>
+      <footer>
+        <a href="./about.html">About</a>
+      </footer>
     </main>
   </body>
 </html>

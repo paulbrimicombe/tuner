@@ -2,15 +2,17 @@ const CACHE_STORAGE_KEY = "tuner-v1.0.8";
 
 const cachedPaths = [
   "/tuner/",
+  "/tuner/about.html",
   "/tuner/index.html",
-  "/tuner/main.css",
   "/tuner/main.mjs",
   "/tuner/manifest.json",
-  "/tuner/reset.css",
   "/tuner/tuner.mjs",
   "/tuner/assets/logo.svg",
   "/tuner/assets/logo-512.png",
   "/tuner/assets/maskable_icon.png",
+  "/tuner/styles/main.css",
+  "/tuner/styles/reset.css",
+  "/tuner/styles/tuner.css",
 ];
 
 self.oninstall = (event) => {
