@@ -149,7 +149,7 @@ const createTunerState = async () => {
     const audioAnalyser = audioContext.createAnalyser();
     audioAnalyser.minDecibels = -100;
     audioAnalyser.maxDecibels = -10;
-    audioAnalyser.smoothingTimeConstant = 0.9;
+    audioAnalyser.smoothingTimeConstant = 0.85;
     audioAnalyser.fftSize = 4096;
 
     const constraints = {

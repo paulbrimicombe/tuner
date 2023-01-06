@@ -3,7 +3,7 @@
   "short_name": "Tunicle",
   "display": "standalone",
   "start_url": "/tuner/",
-  "theme_color": "#73c378",
+  "theme_color": "#131313",
   "background_color": "#131313",
   "icons": [
     {
