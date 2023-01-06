@@ -105,7 +105,7 @@ canvas#frequencies {
   position: absolute;
   transform-origin: bottom;
   transform: translate(-50%, -50%);
-  transition: 0.5s ease-out;
+  transition: 0.5s ease-in-out;
   z-index: 1;
 }
 

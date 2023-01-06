@@ -1,10 +1,10 @@
 {
-  "name": "Reticle tuner",
-  "short_name": "Reticle Tuner",
+  "name": "Tunicle",
+  "short_name": "Tunicle",
   "display": "standalone",
   "start_url": "/tuner/",
   "theme_color": "#73c378",
-  "background_color": "#333333",
+  "background_color": "#131313",
   "icons": [
     {
       "src": "assets/logo.svg",

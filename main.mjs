@@ -7,43 +7,49 @@ if (window.location.host !== null && navigator.serviceWorker != null) {
     console.error("Failed to register service worker", error);
   });
 }
+/** @typedef {{ release: () => void }} WakeLock */
 
-const goButton = document.getElementById("go");
+/**
+ * @returns {Promise<WakeLock | null>}
+ */
+const requestWakeLock = async () => {
+  try {
+    // @ts-ignore
+    return await navigator.wakeLock.request();
+  } catch (err) {
+    console.log(`Unable to keep screen awake: ${err.name}, ${err.message}`);
+    return null;
+  }
+};
 
-if (!goButton) {
-  throw new Error("No go button found!");
-}
+const getById = (id) => {
+  const element = document.getElementById(id);
+  if (!(element instanceof HTMLElement)) {
+    throw new Error(`No HTML element with id ${id} found`);
+  }
+  return element;
+};
 
-const dialDiv = document.getElementById("tuner-dial");
+const getBySelector = (selector) => {
+  const element = document.querySelector(selector);
+  if (!(element instanceof HTMLElement)) {
+    throw new Error(`No HTML element with selector ${selector} found`);
+  }
+  return element;
+};
 
-if (!dialDiv) {
-  throw new Error("No dial found!");
-}
+const goButton = getById("go");
+const dialDiv = getById("tuner-dial");
+const flatDiv = getBySelector("#lights .flat");
+const sharpDiv = getBySelector("#lights .sharp");
+const inTuneDiv = getBySelector("#lights .in-tune");
+const noteSpan = getBySelector("#note .note");
+const octaveSup = getBySelector("#note .octave");
 
-const flatDiv = document.querySelector("#lights .flat");
-const sharpDiv = document.querySelector("#lights .sharp");
-const inTuneDiv = document.querySelector("#lights .in-tune");
-
-if (!flatDiv || !sharpDiv || !inTuneDiv) {
-  throw new Error("One or more tuning lights not found!");
-}
-
-const tunerCanvas = document.getElementById("frequencies");
+const tunerCanvas = getById("frequencies");
 
 if (!(tunerCanvas instanceof HTMLCanvasElement)) {
   throw new Error("No tuner canvas found!");
-}
-
-const noteSpan = document.querySelector("#note .note");
-
-if (!(noteSpan instanceof HTMLElement)) {
-  throw new Error("No note container found!");
-}
-
-const octaveSup = document.querySelector("#note .octave");
-
-if (!(octaveSup instanceof HTMLElement)) {
-  throw new Error("No note octave number container found!");
 }
 
 const tuner = Tuner.create(tunerCanvas);
@@ -67,7 +73,7 @@ const onNote = (note) => {
   noteSpan.textContent = noteString;
   octaveSup.textContent = octaveNumber.toString();
 
-  if (dialDiv && !Number.isNaN(error)) {
+  if (!Number.isNaN(error)) {
     dialDiv.style.setProperty("--tuner-error", String(error));
 
     flatDiv.classList.remove("on");
@@ -86,11 +92,22 @@ const onNote = (note) => {
   }
 };
 
-goButton.onchange = (event) => {
-  if (event.target.checked) {
-    tuner.start(onNote);
-  } else {
-    tuner.stop();
-    onNote(null);
+/** @type {WakeLock | null} */
+let wakeLock = null;
+
+goButton.onchange = async (event) => {
+  try {
+    if (event.target.checked) {
+      wakeLock?.release();
+      wakeLock = await requestWakeLock();
+      tuner.start(onNote);
+    } else {
+      wakeLock?.release();
+      tuner.stop();
+      onNote(null);
+    }
+  } catch (e) {
+    wakeLock?.release();
+    throw e;
   }
 };

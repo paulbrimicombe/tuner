@@ -5,35 +5,7 @@ const PEAK_VALUE_FILTER_VALUE = 0.5;
 const KEY_MAXIMUM_CUT_OFF = 0.8;
 const NOTE_UPDATE_PERIOD = 100;
 
-const NOTE_STRINGS = [
-  "C",
-  "C♯",
-  "D",
-  "E♭",
-  "E",
-  "F",
-  "F♯",
-  "G",
-  "G♯",
-  "A",
-  "B♭",
-  "B",
-];
-
 /** @typedef {{noteString: string, octaveNumber: number, frequency: number, error: number}} Note */
-
-/**
- * @returns {Promise<{ release: () => void }  | undefined>}
- */
-const requestWakeLock = async () => {
-  try {
-    // @ts-ignore
-    return await navigator.wakeLock.request();
-  } catch (err) {
-    console.log(`Unable to keep screen awake: ${err.name}, ${err.message}`);
-    return;
-  }
-};
 
 /**
  * @param {number[] | Uint8Array} data
@@ -59,44 +31,57 @@ const findMaxValue = (data) => {
   return data.reduce((max, value) => (value > max ? value : max), 0);
 };
 
-const frequencyToNoteString = (frequency) => {
-  var noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
-  return Math.round(noteNum) + 69;
-};
+const Note = {
+  NOTE_STRINGS: [
+    "C",
+    "C♯",
+    "D",
+    "E♭",
+    "E",
+    "F",
+    "F♯",
+    "G",
+    "G♯",
+    "A",
+    "B♭",
+    "B",
+  ],
+  frequencyToNoteString: (frequency) => {
+    var noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+    return Math.round(noteNum) + 69;
+  },
+  noteToFrequency: (noteNumber) => {
+    return Math.exp(((noteNumber - 69) / 12) * Math.log(2)) * 440;
+  },
+  /**
+   * @param {number | null} frequency
+   * @returns {Note | null} note
+   */
+  create: (frequency) => {
+    if (frequency === null) {
+      return null;
+    }
+    const midiNoteNumber = Note.frequencyToNoteString(frequency);
+    const octaveNumber = Math.floor(midiNoteNumber / 12) - 1;
+    const noteString = Note.NOTE_STRINGS[midiNoteNumber % 12];
+    const expectedFrequency = Note.noteToFrequency(midiNoteNumber);
 
-const noteToFrequency = (noteNumber) => {
-  return Math.exp(((noteNumber - 69) / 12) * Math.log(2)) * 440;
-};
+    const nextNoteFrequency = Note.noteToFrequency(midiNoteNumber + 1);
+    const previousNoteFrequency = Note.noteToFrequency(midiNoteNumber - 1);
+    const error =
+      frequency - expectedFrequency > 0
+        ? (-1 * (frequency - expectedFrequency)) /
+          (previousNoteFrequency - expectedFrequency)
+        : (frequency - expectedFrequency) /
+          (nextNoteFrequency - expectedFrequency);
 
-/**
- *
- * @param {number | null} frequency
- * @returns {Note | null} note
- */
-const createNote = (frequency) => {
-  if (frequency === null) {
-    return null;
-  }
-  const midiNoteNumber = frequencyToNoteString(frequency);
-  const octaveNumber = Math.floor(midiNoteNumber / 12) - 1;
-  const noteString = NOTE_STRINGS[midiNoteNumber % 12];
-  const expectedFrequency = noteToFrequency(midiNoteNumber);
-
-  const nextNoteFrequency = noteToFrequency(midiNoteNumber + 1);
-  const previousNoteFrequency = noteToFrequency(midiNoteNumber - 1);
-  const error =
-    frequency - expectedFrequency > 0
-      ? (-1 * (frequency - expectedFrequency)) /
-        (previousNoteFrequency - expectedFrequency)
-      : (frequency - expectedFrequency) /
-        (nextNoteFrequency - expectedFrequency);
-
-  return {
-    frequency,
-    octaveNumber,
-    noteString,
-    error,
-  };
+    return {
+      frequency,
+      octaveNumber,
+      noteString,
+      error,
+    };
+  },
 };
 
 /**
@@ -152,7 +137,6 @@ const findPeaks = (data, thresholdFactor) => {
  *   audioAnalyser: AnalyserNode,
  *   timer?: number,
  *   mediaStream: MediaStream
- *   wakeLock?: { release: () => void},
  * }} TunerState
  */
 
@@ -165,10 +149,8 @@ const createTunerState = async () => {
     const audioAnalyser = audioContext.createAnalyser();
     audioAnalyser.minDecibels = -100;
     audioAnalyser.maxDecibels = -10;
-    audioAnalyser.smoothingTimeConstant = 0.85;
+    audioAnalyser.smoothingTimeConstant = 0.9;
     audioAnalyser.fftSize = 4096;
-
-    const wakeLock = await requestWakeLock();
 
     const constraints = {
       audio: {
@@ -183,7 +165,6 @@ const createTunerState = async () => {
       audioAnalyser,
       sampleRate,
       mediaStream,
-      wakeLock,
     };
   } catch (error) {
     audioContext.close();
@@ -242,7 +223,7 @@ export const create = (tunerCanvas) => {
         (maximum) => maximum > 0
       );
       const frequency = keyMaxima[0] ? sampleRate / keyMaxima[0] : null;
-      const note = createNote(frequency);
+      const note = Note.create(frequency);
       onNote(note);
     };
 
@@ -251,6 +232,26 @@ export const create = (tunerCanvas) => {
     if (!canvasContext) {
       throw new Error("Can't get canvas context");
     }
+
+    const gradient = canvasContext.createLinearGradient(
+      0,
+      tunerCanvas.height,
+      0,
+      0
+    );
+    const colourStops = [
+      "#2f984f",
+      "#4daf62",
+      "#73c378",
+      "#97d494",
+      "#b7e2b1",
+      "#d3eecd",
+      "#e8f6e3",
+      "#f7fcf5",
+    ];
+    colourStops.forEach((colour, index) =>
+      gradient.addColorStop(index / colourStops.length, colour)
+    );
 
     const drawFrequencies = () => {
       if (!tunerState) {
@@ -269,28 +270,6 @@ export const create = (tunerCanvas) => {
 
       canvasContext.save();
       canvasContext.fillStyle = "white";
-      const gradient = canvasContext.createLinearGradient(
-        0,
-        tunerCanvas.height,
-        0,
-        0
-      );
-      const colourStops = [
-        // "#00441b",
-        // "#036429",
-        // "#157f3b",
-        "#2f984f",
-        "#4daf62",
-        "#73c378",
-        "#97d494",
-        "#b7e2b1",
-        "#d3eecd",
-        "#e8f6e3",
-        "#f7fcf5",
-      ];
-      colourStops.forEach((colour, index) =>
-        gradient.addColorStop(index / colourStops.length, colour)
-      );
       canvasContext.fillStyle = gradient;
 
       frequencyAnalysis.forEach((magnitude, bucket) => {
@@ -339,7 +318,6 @@ export const create = (tunerCanvas) => {
           clearTimeout(tunerState.timer);
         }
 
-        tunerState.wakeLock?.release();
         tunerState.audioContext.close();
         tunerState.mediaStream.getTracks().forEach((track) => track.stop());
       } finally {
