@@ -86,7 +86,7 @@ const onNote = (note) => {
       sharpDiv.classList.add("on");
     }
 
-    if (Math.abs(error) < 0.02) {
+    if (Math.abs(error) < 0.05) {
       inTuneDiv.classList.add("on");
     }
   }
