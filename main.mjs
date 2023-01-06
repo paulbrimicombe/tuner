@@ -3,8 +3,10 @@
 import * as Tuner from "./tuner.mjs";
 
 if (window.location.host !== null && navigator.serviceWorker != null) {
-  navigator.serviceWorker.register("service-worker.js").catch((error) => {
-    console.error("Failed to register service worker", error);
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch((error) => {
+      console.error("Failed to register service worker", error);
+    });
   });
 }
 /** @typedef {{ release: () => void }} WakeLock */

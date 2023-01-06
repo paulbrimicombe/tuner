@@ -1,26 +1,26 @@
-const CACHE_STORAGE_KEY = "tuner-v1.0.17";
+const CACHE_STORAGE_KEY = "tuner-v1.0.18";
 
 const cachedPaths = [
-  "/tuner/",
-  "/tuner/LICENSE",
-  "/tuner/about.html",
-  "/tuner/index.html",
-  "/tuner/main.mjs",
-  "/tuner/manifest.json",
-  "/tuner/tuner.mjs",
-  "/tuner/assets/logo.svg",
-  "/tuner/assets/logo-512.png",
-  "/tuner/assets/maskable_icon.png",
-  "/tuner/styles/main.css",
-  "/tuner/styles/reset.css",
-  "/tuner/styles/tuner.css",
-];
+  "./",
+  "./LICENSE",
+  "./about.html",
+  "./index.html",
+  "./main.mjs",
+  "./manifest.json",
+  "./tuner.mjs",
+  "./assets/logo.svg",
+  "./assets/logo-512.png",
+  "./assets/maskable_icon.png",
+  "./styles/main.css",
+  "./styles/reset.css",
+  "./styles/tuner.css",
+];  
 
 self.oninstall = (event) => {
   event.waitUntil(
     caches.open(CACHE_STORAGE_KEY).then(async (cache) => {
       await cache.addAll(cachedPaths);
-      await cache.add("/tuner");
+      await cache.add(".");
       await self.skipWaiting();
     })
   );
