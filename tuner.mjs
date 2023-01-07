@@ -240,14 +240,14 @@ export const create = (tunerCanvas) => {
       0
     );
     const colourStops = [
-      "#2f984f",
-      "#4daf62",
-      "#73c378",
-      "#97d494",
-      "#b7e2b1",
-      "#d3eecd",
-      "#e8f6e3",
-      "#f7fcf5",
+      "#2f984fdd",
+      "#4daf62dd",
+      "#73c378dd",
+      "#97d494dd",
+      "#b7e2b1dd",
+      "#d3eecddd",
+      "#e8f6e3dd",
+      "#f7fcf5dd",
     ];
     colourStops.forEach((colour, index) =>
       gradient.addColorStop(index / colourStops.length, colour)

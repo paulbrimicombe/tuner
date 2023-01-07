@@ -9,6 +9,7 @@ if (window.location.host !== null && navigator.serviceWorker != null) {
     });
   });
 }
+
 /** @typedef {{ release: () => void }} WakeLock */
 
 /**
@@ -41,6 +42,11 @@ const getBySelector = (selector) => {
 };
 
 const goButton = getById("go");
+
+if (!(goButton instanceof HTMLInputElement)) {
+  throw new Error("On / off button is not an input");
+}
+
 const dialDiv = getById("tuner-dial");
 const flatDiv = getBySelector("#lights .flat");
 const sharpDiv = getBySelector("#lights .sharp");
@@ -56,10 +62,17 @@ if (!(tunerCanvas instanceof HTMLCanvasElement)) {
 
 const tuner = Tuner.create(tunerCanvas);
 
+/** @type {WakeLock | null} */
+let wakeLock = null;
+
 /**
  * @param {import('./tuner.mjs').Note | null} note
  */
-const onNote = (note) => {
+const onNote = async (note) => {
+  if (!wakeLock) {
+    wakeLock = await requestWakeLock();
+  }
+
   if (note === null) {
     noteSpan.textContent = "\xa0";
     octaveSup.textContent = "\xa0";
@@ -94,22 +107,41 @@ const onNote = (note) => {
   }
 };
 
-/** @type {WakeLock | null} */
-let wakeLock = null;
+const start = async () => {
+  wakeLock?.release();
+  wakeLock = await requestWakeLock();
+  tuner.start(onNote);
+  tunerCanvas.classList.remove("hidden");
+};
 
-goButton.onchange = async (event) => {
+const stop = () => {
+  wakeLock?.release();
+  wakeLock = null;
+  tuner.stop();
+  tunerCanvas.classList.add("hidden");
+  setTimeout(() => {
+    const context = tunerCanvas.getContext("2d");
+    context?.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
+  }, 500);
+
+  onNote(null);
+};
+
+document.addEventListener("visibilitychange", () => {
+  goButton.checked = false;
+  stop();
+});
+
+goButton.addEventListener("change", async () => {
   try {
-    if (event.target.checked) {
-      wakeLock?.release();
-      wakeLock = await requestWakeLock();
-      tuner.start(onNote);
+    if (goButton.checked) {
+      await start();
     } else {
-      wakeLock?.release();
-      tuner.stop();
-      onNote(null);
+      stop();
     }
   } catch (e) {
     wakeLock?.release();
+    wakeLock = null;
     throw e;
   }
-};
+});
