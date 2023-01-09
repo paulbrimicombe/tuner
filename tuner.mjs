@@ -1,6 +1,7 @@
 // @ts-check
 
 const MAX_INTERESTING_FREQUENCY = 10_000;
+const MIN_INTERESTING_FREQUENCY = 20;
 const PEAK_VALUE_FILTER_VALUE = 0.5;
 const KEY_MAXIMUM_CUT_OFF = 0.8;
 const NOTE_UPDATE_PERIOD = 100;
@@ -115,15 +116,19 @@ const findPeaks = (data, thresholdFactor) => {
   const maxValue = findMaxValue(data);
   const threshold = thresholdFactor * maxValue;
 
+  const averagedData = data.map((value, index) => {
+    return (data[index - 1] + value + data[index + 1]) / 3;
+  });
+
   // @ts-ignore
-  return data.reduce((peaks, value, index) => {
+  return averagedData.reduce((peaks, value, index) => {
     // Assume the data is fairly smooth when identifying peaks
     if (
       value > threshold &&
-      data[index - 1] > value &&
-      data[index + 1] < value
+      averagedData[index - 1] > value &&
+      averagedData[index + 1] < value
     ) {
-      const peakValue = interpolateMax(data, index);
+      const peakValue = interpolateMax(averagedData, index);
       return [...peaks, peakValue];
     } else {
       return peaks;
@@ -265,7 +270,13 @@ export const create = (tunerCanvas) => {
         MAX_INTERESTING_FREQUENCY / frequencyBucketWidth
       );
 
-      const bucketWidth = Math.ceil(tunerCanvas.width / maxInterestingBucket);
+      const minInterestingBucket = Math.floor(
+        MIN_INTERESTING_FREQUENCY / frequencyBucketWidth
+      );
+
+      const bucketWidth = Math.ceil(
+        tunerCanvas.width / (maxInterestingBucket - minInterestingBucket)
+      );
       const heightMultiplier = tunerCanvas.height / 255;
 
       canvasContext.save();
@@ -273,11 +284,11 @@ export const create = (tunerCanvas) => {
       canvasContext.fillStyle = gradient;
 
       frequencyAnalysis.forEach((magnitude, bucket) => {
-        if (bucket > maxInterestingBucket) {
+        if (bucket < minInterestingBucket || bucket > maxInterestingBucket) {
           return;
         }
         canvasContext.fillRect(
-          bucket * bucketWidth,
+          (bucket - minInterestingBucket) * bucketWidth,
           tunerCanvas.height,
           bucketWidth,
           -1 * magnitude * heightMultiplier
