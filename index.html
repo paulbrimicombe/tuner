@@ -7,7 +7,7 @@
       name="Description"
       content="A chromatic tuner for musical instruments."
     />
-    <meta name="theme-color" content="#131313">
+    <meta name="theme-color" content="#131313" />
     <title>Tuner</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
@@ -51,7 +51,13 @@
       </header>
       <div class="tuner-visualisation">
         <div id="note">
-          <span class="note">&nbsp;</span><sup class="octave">&nbsp;</sup>
+          <div>
+            <span class="note">&nbsp;</span><sup class="octave">&nbsp;</sup>
+          </div>
+          <div id="error">
+            <span class="sign">&nbsp;</span><span class="value">&nbsp;</span
+            ><span class="unit">&nbsp;</span>
+          </div>
         </div>
         <div id="tuner-scale">
           <div id="tuner-dial"></div>

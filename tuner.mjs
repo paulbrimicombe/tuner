@@ -6,7 +6,7 @@ const PEAK_VALUE_FILTER_VALUE = 0.5;
 const KEY_MAXIMUM_CUT_OFF = 0.8;
 const NOTE_UPDATE_PERIOD = 100;
 
-/** @typedef {{noteString: string, octaveNumber: number, frequency: number, error: number}} Note */
+/** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */
 
 /**
  * @param {number[] | Uint8Array} data
@@ -62,13 +62,13 @@ const Note = {
     if (frequency === null) {
       return null;
     }
-    const midiNoteNumber = Note.frequencyToNoteString(frequency);
-    const octaveNumber = Math.floor(midiNoteNumber / 12) - 1;
-    const noteString = Note.NOTE_STRINGS[midiNoteNumber % 12];
-    const expectedFrequency = Note.noteToFrequency(midiNoteNumber);
+    const midiNumber = Note.frequencyToNoteString(frequency);
+    const octaveNumber = Math.floor(midiNumber / 12) - 1;
+    const noteString = Note.NOTE_STRINGS[midiNumber % 12];
+    const expectedFrequency = Note.noteToFrequency(midiNumber);
 
-    const nextNoteFrequency = Note.noteToFrequency(midiNoteNumber + 1);
-    const previousNoteFrequency = Note.noteToFrequency(midiNoteNumber - 1);
+    const nextNoteFrequency = Note.noteToFrequency(midiNumber + 1);
+    const previousNoteFrequency = Note.noteToFrequency(midiNumber - 1);
     const error =
       frequency - expectedFrequency > 0
         ? (-1 * (frequency - expectedFrequency)) /
@@ -81,6 +81,7 @@ const Note = {
       octaveNumber,
       noteString,
       error,
+      midiNumber,
     };
   },
 };
@@ -113,20 +114,20 @@ const correlationFunction = (data, testValues) => {
  * @returns {number[]}
  */
 const findPeaks = (data, thresholdFactor) => {
-  const maxValue = findMaxValue(data);
-  const threshold = thresholdFactor * maxValue;
-
   const averagedData = data.map((value, index) => {
     return (data[index - 1] + value + data[index + 1]) / 3;
   });
+
+  const maxValue = findMaxValue(averagedData);
+  const threshold = thresholdFactor * maxValue;
 
   // @ts-ignore
   return averagedData.reduce((peaks, value, index) => {
     // Assume the data is fairly smooth when identifying peaks
     if (
       value > threshold &&
-      averagedData[index - 1] > value &&
-      averagedData[index + 1] < value
+      averagedData[index - 1] <= value &&
+      averagedData[index + 1] <= value
     ) {
       const peakValue = interpolateMax(averagedData, index);
       return [...peaks, peakValue];

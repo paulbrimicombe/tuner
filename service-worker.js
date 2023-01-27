@@ -1,4 +1,4 @@
-const CACHE_STORAGE_KEY = "tuner-v1.0.20";
+const CACHE_STORAGE_KEY = "tuner-v1.0.21";
 
 const cachedPaths = [
   "./",

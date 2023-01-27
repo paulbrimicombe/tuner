@@ -2,6 +2,8 @@
 
 import * as Tuner from "./tuner.mjs";
 
+const NBSP = "\xa0";
+
 if (window.location.host !== null && navigator.serviceWorker != null) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("service-worker.js").catch((error) => {
@@ -41,6 +43,31 @@ const getBySelector = (selector) => {
   return element;
 };
 
+/**
+ * @param {number | null} error the decimal tuning error
+ * @param {{ sign: HTMLElement, value: HTMLElement, unit: HTMLElement}} errorElements
+ */
+const updateError = (error, { sign, value, unit }) => {
+  if (error === null) {
+    sign.textContent = NBSP;
+    value.textContent = NBSP;
+    unit.textContent = NBSP;
+    return;
+  }
+  const fixedPrecision = Math.abs(error * 100).toFixed(0);
+
+  const padded =
+    fixedPrecision.length < 2
+      ? fixedPrecision.length === 0
+        ? `00`
+        : `0${fixedPrecision}`
+      : fixedPrecision;
+
+  sign.textContent = error >= 0 ? "+" : "−";
+  value.textContent = padded;
+  unit.textContent = "¢";
+};
+
 const goButton = getById("go");
 
 if (!(goButton instanceof HTMLInputElement)) {
@@ -53,6 +80,11 @@ const sharpDiv = getBySelector("#lights .sharp");
 const inTuneDiv = getBySelector("#lights .in-tune");
 const noteSpan = getBySelector("#note .note");
 const octaveSup = getBySelector("#note .octave");
+const errorElements = {
+  sign: getBySelector("#error .sign"),
+  value: getBySelector("#error .value"),
+  unit: getBySelector("#error .unit"),
+};
 
 const tunerCanvas = getById("frequencies");
 
@@ -65,6 +97,12 @@ const tuner = Tuner.create(tunerCanvas);
 /** @type {WakeLock | null} */
 let wakeLock = null;
 
+/**  @type {import("./tuner.mjs").Note | null} */
+let previousNote = null;
+
+/**  @type {number[]} */
+const previousErrors = [];
+
 /**
  * @param {import('./tuner.mjs').Note | null} note
  */
@@ -74,30 +112,47 @@ const onNote = async (note) => {
   }
 
   if (note === null) {
-    noteSpan.textContent = "\xa0";
-    octaveSup.textContent = "\xa0";
+    noteSpan.textContent = NBSP;
+    octaveSup.textContent = NBSP;
+    errorElements.sign.textContent = NBSP;
+    errorElements.value.textContent = NBSP;
+    errorElements.unit.textContent = NBSP;
     dialDiv.style.setProperty("--tuner-error", String(0));
     sharpDiv.classList.remove("on");
     inTuneDiv.classList.remove("on");
     flatDiv.classList.remove("on");
+    previousNote = note;
     return;
   }
 
-  const { noteString, octaveNumber, error } = note;
+  const { noteString, octaveNumber, error, midiNumber } = note;
 
   noteSpan.textContent = noteString;
   octaveSup.textContent = octaveNumber.toString();
 
   if (!Number.isNaN(error)) {
-    dialDiv.style.setProperty("--tuner-error", String(error));
+    if (previousNote?.midiNumber !== midiNumber) {
+      previousErrors.splice(0, previousErrors.length);
+    }
+
+    previousErrors.push(error);
+
+    if (previousErrors.length > 5) {
+      previousErrors.shift();
+    }
+
+    const smoothedError = previousErrors.reduce((sum, entry) => sum + entry, 0) / previousErrors.length;
+    dialDiv.style.setProperty("--tuner-error", String(smoothedError));
+
+    updateError(smoothedError, errorElements);
 
     flatDiv.classList.remove("on");
     sharpDiv.classList.remove("on");
     inTuneDiv.classList.remove("on");
 
-    if (error < -0.01) {
+    if (error < -0.05) {
       flatDiv.classList.add("on");
-    } else if (error > 0.01) {
+    } else if (error > 0.05) {
       sharpDiv.classList.add("on");
     }
 
@@ -105,6 +160,8 @@ const onNote = async (note) => {
       inTuneDiv.classList.add("on");
     }
   }
+
+  previousNote = note;
 };
 
 const start = async () => {
