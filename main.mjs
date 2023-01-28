@@ -146,7 +146,7 @@ const onNote = async (note) => {
 const start = async () => {
   wakeLock?.release();
   wakeLock = await requestWakeLock();
-  tuner.start(onNote);
+  tuner.start(onNote, "harmonics");
   tunerCanvas.classList.remove("hidden");
 };
 

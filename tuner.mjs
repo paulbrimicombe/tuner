@@ -8,6 +8,8 @@ const NOTE_UPDATE_PERIOD = 100;
 
 /** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */
 
+/** @typedef {"frequencies" | "harmonics"} GraphType */
+
 /**
  * @param {number[] | Uint8Array} data
  * @param {number} index
@@ -142,7 +144,8 @@ const findPeaks = (data, thresholdFactor) => {
  *   audioContext: AudioContext,
  *   audioAnalyser: AnalyserNode,
  *   timer?: number,
- *   mediaStream: MediaStream
+ *   mediaStream: MediaStream,
+ *   note: Note | null
  * }} TunerState
  */
 
@@ -171,6 +174,7 @@ const createTunerState = async () => {
       audioAnalyser,
       sampleRate,
       mediaStream,
+      note: null,
     };
   } catch (error) {
     audioContext.close();
@@ -183,8 +187,11 @@ export const create = (tunerCanvas) => {
   /** @type TunerState | null */
   let tunerState = null;
 
-  /** @param {(note: Note | null) => void} onNote */
-  const start = async (onNote) => {
+  /**
+   * @param {(note: Note | null) => void} onNote
+   * @param {GraphType} graphType
+   */
+  const start = async (onNote, graphType = "frequencies") => {
     if (tunerState) {
       stop();
     }
@@ -230,7 +237,11 @@ export const create = (tunerCanvas) => {
       );
       const frequency = keyMaxima[0] ? sampleRate / keyMaxima[0] : null;
       const note = Note.create(frequency);
-      onNote(note);
+
+      if (tunerState) {
+        tunerState.note = note;
+        onNote(note);
+      }
     };
 
     const canvasContext = tunerCanvas.getContext("2d");
@@ -246,18 +257,75 @@ export const create = (tunerCanvas) => {
       0
     );
     const colourStops = [
-      "#2f984fdd",
-      "#4daf62dd",
+      "#2f984fff",
+      "#4daf62ee",
       "#73c378dd",
-      "#97d494dd",
-      "#b7e2b1dd",
-      "#d3eecddd",
-      "#e8f6e3dd",
-      "#f7fcf5dd",
+      "#97d494cc",
+      "#b7e2b1bb",
+      "#d3eecdaa",
+      "#e8f6e399",
+      "#f7fcf588",
     ];
-    colourStops.forEach((colour, index) =>
-      gradient.addColorStop(index / colourStops.length, colour)
-    );
+    colourStops.forEach((colour, index) => {
+      gradient.addColorStop(index / colourStops.length, colour);
+    });
+
+    const heightMultiplier = tunerCanvas.height / 255;
+
+    const drawHarmonics = () => {
+      if (!tunerState) {
+        return;
+      }
+      canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
+
+      if (tunerState.note) {
+        audioAnalyser.getByteFrequencyData(frequencyAnalysis);
+        const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
+
+        const bucketIndex = Math.floor(
+          tunerState.note.frequency / frequencyBucketWidth
+        );
+        const interestingBuckets = [
+          bucketIndex,
+          bucketIndex * 2,
+          bucketIndex * 3,
+          bucketIndex * 4,
+          bucketIndex * 5,
+          bucketIndex * 6,
+          bucketIndex * 7,
+          bucketIndex * 8,
+        ];
+
+        const harmonicIntensities = interestingBuckets.map(
+          (index) =>
+            (frequencyAnalysis[index - 1] +
+              frequencyAnalysis[index + 1] +
+              frequencyAnalysis[index]) /
+            3
+        );
+
+        canvasContext.save();
+        canvasContext.fillStyle = gradient;
+
+        const harmonicsBucketWidth = Math.ceil(
+          tunerCanvas.width / interestingBuckets.length
+        );
+        const harmonicsBucketPadding = harmonicsBucketWidth / 4;
+
+        harmonicIntensities.forEach((magnitude, index) => {
+          canvasContext.fillRect(
+            index * harmonicsBucketWidth + harmonicsBucketPadding,
+            tunerCanvas.height,
+            harmonicsBucketWidth - harmonicsBucketPadding * 2,
+            -1 * magnitude * heightMultiplier
+          );
+        });
+
+        canvasContext.restore();
+      }
+
+      window.requestAnimationFrame(drawHarmonics);
+    };
 
     const drawFrequencies = () => {
       if (!tunerState) {
@@ -278,7 +346,6 @@ export const create = (tunerCanvas) => {
       const bucketWidth = Math.ceil(
         tunerCanvas.width / (maxInterestingBucket - minInterestingBucket)
       );
-      const heightMultiplier = tunerCanvas.height / 255;
 
       canvasContext.save();
       canvasContext.fillStyle = "white";
@@ -301,6 +368,7 @@ export const create = (tunerCanvas) => {
     };
 
     const updateNote = () => {
+      audioAnalyser.getByteFrequencyData(frequencyAnalysis);
       const interestingPeaks = findPeaks(
         frequencyAnalysis,
         PEAK_VALUE_FILTER_VALUE
@@ -319,7 +387,11 @@ export const create = (tunerCanvas) => {
       }
     };
 
-    drawFrequencies();
+    if (graphType === "frequencies") {
+      drawFrequencies();
+    } else {
+      drawHarmonics();
+    }
     updateNote();
   };
 
