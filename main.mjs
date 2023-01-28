@@ -97,12 +97,6 @@ const tuner = Tuner.create(tunerCanvas);
 /** @type {WakeLock | null} */
 let wakeLock = null;
 
-/**  @type {import("./tuner.mjs").Note | null} */
-let previousNote = null;
-
-/**  @type {number[]} */
-const previousErrors = [];
-
 /**
  * @param {import('./tuner.mjs').Note | null} note
  */
@@ -121,30 +115,17 @@ const onNote = async (note) => {
     sharpDiv.classList.remove("on");
     inTuneDiv.classList.remove("on");
     flatDiv.classList.remove("on");
-    previousNote = note;
     return;
   }
 
-  const { noteString, octaveNumber, error, midiNumber } = note;
+  const { noteString, octaveNumber, error } = note;
 
   noteSpan.textContent = noteString;
   octaveSup.textContent = octaveNumber.toString();
 
   if (!Number.isNaN(error)) {
-    if (previousNote?.midiNumber !== midiNumber) {
-      previousErrors.splice(0, previousErrors.length);
-    }
-
-    previousErrors.push(error);
-
-    if (previousErrors.length > 5) {
-      previousErrors.shift();
-    }
-
-    const smoothedError = previousErrors.reduce((sum, entry) => sum + entry, 0) / previousErrors.length;
-    dialDiv.style.setProperty("--tuner-error", String(smoothedError));
-
-    updateError(smoothedError, errorElements);
+    dialDiv.style.setProperty("--tuner-error", String(error));
+    updateError(error, errorElements);
 
     flatDiv.classList.remove("on");
     sharpDiv.classList.remove("on");
@@ -156,12 +137,10 @@ const onNote = async (note) => {
       sharpDiv.classList.add("on");
     }
 
-    if (Math.abs(error) < 0.05) {
+    if (Math.abs(error) < 0.8) {
       inTuneDiv.classList.add("on");
     }
   }
-
-  previousNote = note;
 };
 
 const start = async () => {

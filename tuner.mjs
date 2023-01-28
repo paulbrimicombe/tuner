@@ -3,7 +3,7 @@
 const MAX_INTERESTING_FREQUENCY = 10_000;
 const MIN_INTERESTING_FREQUENCY = 20;
 const PEAK_VALUE_FILTER_VALUE = 0.5;
-const KEY_MAXIMUM_CUT_OFF = 0.8;
+const KEY_MAXIMUM_CUT_OFF = 0.9;
 const NOTE_UPDATE_PERIOD = 100;
 
 /** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */

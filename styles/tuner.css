@@ -99,8 +99,9 @@ canvas#frequencies {
   position: relative;
   max-height: 8em;
   min-height: 3em;
-  width: 80%;
+  width: 90%;
   flex: 1;
+  --scale-font-size: 0.75;
 }
 
 #tuner-scale .label::before {
@@ -109,7 +110,7 @@ canvas#frequencies {
   position: absolute;
   z-index: 1;
   bottom: 0;
-  font-size: 0.75em;
+  font-size: calc(var(--scale-font-size) * 1em);
   transform: translate(-50%, 0);
   left: calc(50% + (var(--tuner-pip) * 1%));
 }
@@ -120,14 +121,14 @@ canvas#frequencies {
   position: absolute;
   border-left: 2px solid #eee;
   z-index: 1;
-  top: 40%;
+  top: calc(50% - 0.6 * var(--scale-font-size) * 1em);
   transform: translate(-50%, -50%);
   left: calc(50% + (var(--tuner-pip) * 1%));
   height: 35%;
 }
 
 #tuner-scale .pip.label::after {
-  height: calc(100% - 2 * 1.1em);
+  height: calc(100% - 2.5 * var(--scale-font-size) * 1em);
 }
 
 #tuner-scale .pip.fine::after {
@@ -146,8 +147,8 @@ canvas#frequencies {
   content: "";
   width: 10px;
   left: calc(50% + (var(--tuner-error) * 100%));
-  top: 40%;
-  height: calc(100% - 2 * 1em + 3px);
+  top: calc(50% - 0.6 * var(--scale-font-size) * 1em);
+  height: calc(100% - 2.5 * var(--scale-font-size) * 1em + 8px);
   border: 2px solid #fd3e3e;
   border-radius: 2px;
   position: absolute;
