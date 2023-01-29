@@ -92,6 +92,18 @@ if (!(tunerCanvas instanceof HTMLCanvasElement)) {
   throw new Error("No tuner canvas found!");
 }
 
+/**
+ * @param {number[]} harmonics
+ */
+const updateHarmonics = (harmonics = []) => {
+  for (let i = 0; i <= 8; i++) {
+    const element = document.querySelector(`#harmonics #harmonic-${i}`);
+    if (element instanceof HTMLElement) {
+      element.style.setProperty("--intensity", String(harmonics[i] ?? 0));
+    }
+  }
+};
+
 const tuner = Tuner.create(tunerCanvas);
 
 /** @type {WakeLock | null} */
@@ -99,8 +111,9 @@ let wakeLock = null;
 
 /**
  * @param {import('./tuner.mjs').Note | null} note
+ * @param {number[]} harmonics
  */
-const onNote = async (note) => {
+const onNote = async (note, harmonics) => {
   if (!wakeLock) {
     wakeLock = await requestWakeLock();
   }
@@ -115,9 +128,11 @@ const onNote = async (note) => {
     sharpDiv.classList.remove("on");
     inTuneDiv.classList.remove("on");
     flatDiv.classList.remove("on");
+    updateHarmonics();
     return;
   }
 
+  updateHarmonics(harmonics);
   const { noteString, octaveNumber, error } = note;
 
   noteSpan.textContent = noteString;
@@ -137,7 +152,7 @@ const onNote = async (note) => {
       sharpDiv.classList.add("on");
     }
 
-    if (Math.abs(error) < 0.8) {
+    if (Math.abs(error) < 0.7) {
       inTuneDiv.classList.add("on");
     }
   }
@@ -146,7 +161,7 @@ const onNote = async (note) => {
 const start = async () => {
   wakeLock?.release();
   wakeLock = await requestWakeLock();
-  tuner.start(onNote, "harmonics");
+  tuner.start(onNote);
   tunerCanvas.classList.remove("hidden");
 };
 
@@ -160,7 +175,7 @@ const stop = () => {
     context?.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
   }, 500);
 
-  onNote(null);
+  onNote(null, []);
 };
 
 document.addEventListener("visibilitychange", () => {

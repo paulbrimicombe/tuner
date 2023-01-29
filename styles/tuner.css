@@ -6,6 +6,8 @@
   width: 100%;
   border-radius: 1em;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .graph::before {
@@ -23,11 +25,33 @@
   opacity: 0;
 }
 
+#harmonics {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 5px;
+  --intensity: 1;
+}
+
+#harmonics div {
+  width: 5%;
+  background: linear-gradient(to top, #2f984fff, #f7fcf588);
+  background-size: 100% calc(10000 / max(var(--intensity), 1) * 1%);
+  background-position-y: bottom;
+  background-repeat: repeat-x;
+  transition: height 0.2s linear;
+  height: max(1%, var(--intensity) * 1%);
+  position: relative;
+}
+
 canvas#frequencies {
   transition: opacity 0.5s;
   width: 100%;
   height: 100%;
   padding: 5px;
+  flex: 1;
 }
 
 .tuner-visualisation {

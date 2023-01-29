@@ -3,12 +3,10 @@
 const MAX_INTERESTING_FREQUENCY = 10_000;
 const MIN_INTERESTING_FREQUENCY = 20;
 const PEAK_VALUE_FILTER_VALUE = 0.5;
-const KEY_MAXIMUM_CUT_OFF = 0.9;
+const KEY_MAXIMUM_CUT_OFF = 0.8;
 const NOTE_UPDATE_PERIOD = 100;
 
 /** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */
-
-/** @typedef {"frequencies" | "harmonics"} GraphType */
 
 /**
  * @param {number[] | Uint8Array} data
@@ -188,10 +186,9 @@ export const create = (tunerCanvas) => {
   let tunerState = null;
 
   /**
-   * @param {(note: Note | null) => void} onNote
-   * @param {GraphType} graphType
+   * @param {(note: Note | null, harmonics: number[]) => void} onNote
    */
-  const start = async (onNote, graphType = "frequencies") => {
+  const start = async (onNote) => {
     if (tunerState) {
       stop();
     }
@@ -204,6 +201,36 @@ export const create = (tunerCanvas) => {
     audioSource.connect(audioAnalyser);
 
     const frequencyAnalysis = new Uint8Array(audioAnalyser.frequencyBinCount);
+
+    const findHarmonicIntensities = () => {
+      if (!tunerState || !tunerState.note) {
+        return [];
+      }
+      const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
+
+      const bucketIndex = Math.floor(
+        tunerState.note.frequency / frequencyBucketWidth
+      );
+      const interestingBuckets = [
+        bucketIndex,
+        bucketIndex * 2,
+        bucketIndex * 3,
+        bucketIndex * 4,
+        bucketIndex * 5,
+        bucketIndex * 6,
+        bucketIndex * 7,
+        bucketIndex * 8,
+      ];
+
+      return interestingBuckets.map(
+        (index) =>
+          100 * (frequencyAnalysis[index - 1] +
+            frequencyAnalysis[index + 1] +
+            frequencyAnalysis[index]) /
+          3 /
+          255
+      );
+    };
 
     /**
      * @param {number[]} estimates
@@ -240,7 +267,8 @@ export const create = (tunerCanvas) => {
 
       if (tunerState) {
         tunerState.note = note;
-        onNote(note);
+        const harmonics = findHarmonicIntensities();
+        onNote(note, harmonics);
       }
     };
 
@@ -271,61 +299,6 @@ export const create = (tunerCanvas) => {
     });
 
     const heightMultiplier = tunerCanvas.height / 255;
-
-    const drawHarmonics = () => {
-      if (!tunerState) {
-        return;
-      }
-      canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
-
-      if (tunerState.note) {
-        audioAnalyser.getByteFrequencyData(frequencyAnalysis);
-        const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
-
-        const bucketIndex = Math.floor(
-          tunerState.note.frequency / frequencyBucketWidth
-        );
-        const interestingBuckets = [
-          bucketIndex,
-          bucketIndex * 2,
-          bucketIndex * 3,
-          bucketIndex * 4,
-          bucketIndex * 5,
-          bucketIndex * 6,
-          bucketIndex * 7,
-          bucketIndex * 8,
-        ];
-
-        const harmonicIntensities = interestingBuckets.map(
-          (index) =>
-            (frequencyAnalysis[index - 1] +
-              frequencyAnalysis[index + 1] +
-              frequencyAnalysis[index]) /
-            3
-        );
-
-        canvasContext.save();
-        canvasContext.fillStyle = gradient;
-
-        const harmonicsBucketWidth = Math.ceil(
-          tunerCanvas.width / interestingBuckets.length
-        );
-        const harmonicsBucketPadding = harmonicsBucketWidth / 4;
-
-        harmonicIntensities.forEach((magnitude, index) => {
-          canvasContext.fillRect(
-            index * harmonicsBucketWidth + harmonicsBucketPadding,
-            tunerCanvas.height,
-            harmonicsBucketWidth - harmonicsBucketPadding * 2,
-            -1 * magnitude * heightMultiplier
-          );
-        });
-
-        canvasContext.restore();
-      }
-
-      window.requestAnimationFrame(drawHarmonics);
-    };
 
     const drawFrequencies = () => {
       if (!tunerState) {
@@ -387,11 +360,7 @@ export const create = (tunerCanvas) => {
       }
     };
 
-    if (graphType === "frequencies") {
-      drawFrequencies();
-    } else {
-      drawHarmonics();
-    }
+    drawFrequencies();
     updateNote();
   };
 
