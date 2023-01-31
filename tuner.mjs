@@ -222,14 +222,19 @@ export const create = (tunerCanvas) => {
         bucketIndex * 8,
       ];
 
-      return interestingBuckets.map(
-        (index) =>
-          100 * (frequencyAnalysis[index - 1] +
-            frequencyAnalysis[index + 1] +
-            frequencyAnalysis[index]) /
-          3 /
-          255
-      );
+      const harmonicIntensities = interestingBuckets
+        .filter((entry) => entry < frequencyAnalysis.length - 2)
+        .map(
+          (index) =>
+            (100 *
+              (frequencyAnalysis[index - 1] +
+                frequencyAnalysis[index + 1] +
+                frequencyAnalysis[index])) /
+            3 /
+            255
+        );
+
+      return harmonicIntensities;
     };
 
     /**
@@ -341,7 +346,6 @@ export const create = (tunerCanvas) => {
     };
 
     const updateNote = () => {
-      audioAnalyser.getByteFrequencyData(frequencyAnalysis);
       const interestingPeaks = findPeaks(
         frequencyAnalysis,
         PEAK_VALUE_FILTER_VALUE
@@ -353,7 +357,7 @@ export const create = (tunerCanvas) => {
       const peakFrequencies = interestingPeaks.map(
         (value) => value * bucketWidth
       );
-      findNote(peakFrequencies, 10);
+      findNote(peakFrequencies, 3);
 
       if (tunerState) {
         tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD);

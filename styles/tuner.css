@@ -32,6 +32,7 @@
   justify-content: space-around;
   align-items: flex-end;
   padding: 5px;
+  padding-bottom: 1em;
   --intensity: 1;
 }
 
@@ -41,9 +42,29 @@
   background-size: 100% calc(10000 / max(var(--intensity), 1) * 1%);
   background-position-y: bottom;
   background-repeat: repeat-x;
-  transition: height 0.2s linear;
+  transition: height 0.1s linear;
   height: max(1%, var(--intensity) * 1%);
   position: relative;
+}
+
+#harmonics div::before {
+  content: attr(data-frequency);
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 100%);
+  font-size: 0.75em;
+}
+
+#harmonics div::after {
+  content: "Hz";
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, calc(100% + 1em));
+  font-size: 0.75em;
 }
 
 canvas#frequencies {

@@ -86,6 +86,14 @@ const errorElements = {
   unit: getBySelector("#error .unit"),
 };
 
+const harmonicsDiv = getById("harmonics");
+
+/** @type {HTMLElement[]} */
+const harmonicElements = [];
+for (let i = 0; i <= 7; i++) {
+  harmonicElements.push(getBySelector(`#harmonics #harmonic-${i}`));
+}
+
 const tunerCanvas = getById("frequencies");
 
 if (!(tunerCanvas instanceof HTMLCanvasElement)) {
@@ -93,15 +101,14 @@ if (!(tunerCanvas instanceof HTMLCanvasElement)) {
 }
 
 /**
+ * @param {number | null} fundamental
  * @param {number[]} harmonics
  */
-const updateHarmonics = (harmonics = []) => {
-  for (let i = 0; i <= 8; i++) {
-    const element = document.querySelector(`#harmonics #harmonic-${i}`);
-    if (element instanceof HTMLElement) {
-      element.style.setProperty("--intensity", String(harmonics[i] ?? 0));
-    }
-  }
+const updateHarmonics = (fundamental = null, harmonics = []) => {
+  harmonicElements.forEach((element, i) => {
+    element.style.setProperty("--intensity", String(harmonics[i] ?? 0));
+    element.dataset['frequency'] = fundamental ? `${Math.round(fundamental * (i + 1))}` : "-"
+  });
 };
 
 const tuner = Tuner.create(tunerCanvas);
@@ -132,7 +139,7 @@ const onNote = async (note, harmonics) => {
     return;
   }
 
-  updateHarmonics(harmonics);
+  updateHarmonics(note.frequency, harmonics);
   const { noteString, octaveNumber, error } = note;
 
   noteSpan.textContent = noteString;
@@ -152,7 +159,7 @@ const onNote = async (note, harmonics) => {
       sharpDiv.classList.add("on");
     }
 
-    if (Math.abs(error) < 0.7) {
+    if (Math.abs(error) < 0.07) {
       inTuneDiv.classList.add("on");
     }
   }
