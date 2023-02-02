@@ -1,6 +1,6 @@
 // @ts-check
 
-const MAX_INTERESTING_FREQUENCY = 10_000;
+const MAX_INTERESTING_FREQUENCY = 12_000;
 const MIN_INTERESTING_FREQUENCY = 20;
 const PEAK_VALUE_FILTER_VALUE = 0.5;
 const KEY_MAXIMUM_CUT_OFF = 0.8;
@@ -220,19 +220,23 @@ export const create = (tunerCanvas) => {
         bucketIndex * 6,
         bucketIndex * 7,
         bucketIndex * 8,
+        bucketIndex * 9,
+        bucketIndex * 10,
+        bucketIndex * 11,
+        bucketIndex * 12,
       ];
 
       const harmonicIntensities = interestingBuckets
-        .filter((entry) => entry < frequencyAnalysis.length - 2)
-        .map(
-          (index) =>
-            (100 *
-              (frequencyAnalysis[index - 1] +
-                frequencyAnalysis[index + 1] +
-                frequencyAnalysis[index])) /
-            3 /
-            255
-        );
+        .filter((entry) => entry < frequencyAnalysis.length)
+        .map((index) => {
+          let elements = 0;
+          let sum = 0;
+          for (let i = -5; i <= 5; i++) {
+            sum += frequencyAnalysis[index - i] ?? 0;
+            elements += frequencyAnalysis[index - i] === undefined ? 0 : 1;
+          }
+          return (100 * (sum / elements)) / 255;
+        });
 
       return harmonicIntensities;
     };

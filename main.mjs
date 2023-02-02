@@ -90,7 +90,7 @@ const harmonicsDiv = getById("harmonics");
 
 /** @type {HTMLElement[]} */
 const harmonicElements = [];
-for (let i = 0; i <= 7; i++) {
+for (let i = 0; i <= 11; i++) {
   harmonicElements.push(getBySelector(`#harmonics #harmonic-${i}`));
 }
 
@@ -107,7 +107,9 @@ if (!(tunerCanvas instanceof HTMLCanvasElement)) {
 const updateHarmonics = (fundamental = null, harmonics = []) => {
   harmonicElements.forEach((element, i) => {
     element.style.setProperty("--intensity", String(harmonics[i] ?? 0));
-    element.dataset['frequency'] = fundamental ? `${Math.round(fundamental * (i + 1))}` : "-"
+    element.dataset["frequency"] = fundamental
+      ? `${Math.round(fundamental * (i + 1))}`
+      : "-";
   });
 };
 
