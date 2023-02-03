@@ -47,6 +47,12 @@
   position: relative;
 }
 
+@media (max-width: 30em) {
+  #harmonics :nth-child(n+9) {
+    display: none;
+  }
+}
+
 #harmonics div::before {
   content: attr(data-frequency);
   text-align: center;
