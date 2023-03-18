@@ -27,10 +27,18 @@ const requestWakeLock = async () => {
   }
 };
 
-const getById = (id) => {
+/**
+ * @template A extends HTMLElement
+ * @param {string} id
+ * @param {{ new (): A }} type
+ * @returns A
+ */
+const getById = (id, type) => {
   const element = document.getElementById(id);
-  if (!(element instanceof HTMLElement)) {
-    throw new Error(`No HTML element with id ${id} found`);
+  if (!element || !(element instanceof type)) {
+    throw new Error(
+      `Expected HTML element with id ${id} to exist and be a ${type}`
+    );
   }
   return element;
 };
@@ -68,25 +76,11 @@ const updateError = (error, { sign, value, unit }) => {
   unit.textContent = "¢";
 };
 
-const goButton = getById("go");
+const goButton = getById("go", HTMLInputElement);
+const showHarmonicsButton = getById("show-harmonics", HTMLInputElement);
+const showFrequenciesButton = getById("show-frequencies", HTMLInputElement);
 
-if (!(goButton instanceof HTMLInputElement)) {
-  throw new Error("On / off button is not an input");
-}
-
-const showHarmonicsButton = getById("show-harmonics");
-
-if (!(showHarmonicsButton instanceof HTMLInputElement)) {
-  throw new Error("Enable harmonics button is not an input");
-}
-
-const showFrequenciesButton = getById("show-frequencies");
-
-if (!(showFrequenciesButton instanceof HTMLInputElement)) {
-  throw new Error("Enable frequencies button is not an input");
-}
-
-const dialDiv = getById("tuner-dial");
+const dialDiv = getById("tuner-dial", HTMLElement);
 const flatDiv = getBySelector("#lights .flat");
 const sharpDiv = getBySelector("#lights .sharp");
 const inTuneDiv = getBySelector("#lights .in-tune");
@@ -98,7 +92,7 @@ const errorElements = {
   unit: getBySelector("#error .unit"),
 };
 
-const harmonicsDiv = getById("harmonics");
+const harmonicsDiv = getById("harmonics", HTMLElement);
 
 /** @type {HTMLElement[]} */
 const harmonicElements = [];
@@ -106,7 +100,7 @@ for (let i = 0; i <= 11; i++) {
   harmonicElements.push(getBySelector(`#harmonics #harmonic-${i}`));
 }
 
-const tunerCanvas = getById("frequencies");
+const tunerCanvas = getById("frequencies", HTMLElement);
 
 if (!(tunerCanvas instanceof HTMLCanvasElement)) {
   throw new Error("No tuner canvas found!");
