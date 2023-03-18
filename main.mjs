@@ -74,6 +74,12 @@ if (!(goButton instanceof HTMLInputElement)) {
   throw new Error("On / off button is not an input");
 }
 
+const showHarmonicsButton = getById("show-harmonics");
+
+if (!(showHarmonicsButton instanceof HTMLInputElement)) {
+  throw new Error("Enable harmonics button is not an input");
+}
+
 const dialDiv = getById("tuner-dial");
 const flatDiv = getBySelector("#lights .flat");
 const sharpDiv = getBySelector("#lights .sharp");
@@ -203,5 +209,15 @@ goButton.addEventListener("change", async () => {
     wakeLock?.release();
     wakeLock = null;
     throw e;
+  }
+});
+
+showHarmonicsButton.addEventListener("change", async () => {
+  if (!showHarmonicsButton.checked) {
+    harmonicsDiv.style.visibility = "hidden";
+    tunerCanvas.height = 400;
+  } else {
+    harmonicsDiv.style.visibility = "initial";
+    tunerCanvas.height = 200;
   }
 });

@@ -52,7 +52,7 @@ h1 {
   min-height: 3.5em;
   flex: 1;
   display: flex;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   justify-content: center;
   flex-direction: column;
   gap: 1em;

@@ -261,10 +261,15 @@ form {
   --checkbox-switch-spacing: 5px;
 }
 
+.checkbox-container {
+  display: inline-block;
+  margin-right: 1em;
+}
+
 input[type=checkbox] {
   height: var(--checkbox-height);
   width: var(--checkbox-width);
-  display: block;
+  display: inline;
   position: absolute;
 }
 
@@ -287,7 +292,7 @@ label:before {
   background: grey;
   box-shadow: 0px 0px 3px #000 inset;
   display: inline-block;
-  margin-right: 1em;
+  margin-right: 0.5em;
   border-radius: calc(var(--checkbox-height) / 2);
 }
 

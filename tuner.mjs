@@ -287,29 +287,29 @@ export const create = (tunerCanvas) => {
       throw new Error("Can't get canvas context");
     }
 
-    const gradient = canvasContext.createLinearGradient(
-      0,
-      tunerCanvas.height,
-      0,
-      0
-    );
-    const colourStops = [
-      "#2f984fff",
-      "#4daf62ee",
-      "#73c378dd",
-      "#97d494cc",
-      "#b7e2b1bb",
-      "#d3eecdaa",
-      "#e8f6e399",
-      "#f7fcf588",
-    ];
-    colourStops.forEach((colour, index) => {
-      gradient.addColorStop(index / colourStops.length, colour);
-    });
-
-    const heightMultiplier = tunerCanvas.height / 255;
-
     const drawFrequencies = () => {
+      const heightMultiplier = tunerCanvas.height / 255;
+
+      const gradient = canvasContext.createLinearGradient(
+        0,
+        tunerCanvas.height,
+        0,
+        0
+      );
+      const colourStops = [
+        "#2f984fff",
+        "#4daf62ee",
+        "#73c378dd",
+        "#97d494cc",
+        "#b7e2b1bb",
+        "#d3eecdaa",
+        "#e8f6e399",
+        "#f7fcf588",
+      ];
+      colourStops.forEach((colour, index) => {
+        gradient.addColorStop(index / colourStops.length, colour);
+      });
+
       if (!tunerState) {
         return;
       }
