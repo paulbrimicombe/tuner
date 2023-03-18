@@ -42,7 +42,7 @@
   background-size: 100% calc(10000 / max(var(--intensity), 1) * 1%);
   background-position-y: bottom;
   background-repeat: repeat-x;
-  transition: height 0.1s linear;
+  /* transition: height 0.1s linear; */
   height: max(1%, var(--intensity) * 1%);
   position: relative;
 }
