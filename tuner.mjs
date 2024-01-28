@@ -1,10 +1,17 @@
 // @ts-check
 
+const MIN_NOTE_FREQUENCY = 27;
+const MAX_NOTE_FREQUENCY = 8_000;
+
+// For graphing purposes
 const MAX_INTERESTING_FREQUENCY = 12_000;
 const MIN_INTERESTING_FREQUENCY = 20;
+
+// When looking for note estimates
 const PEAK_VALUE_FILTER_VALUE = 0.5;
+
 const KEY_MAXIMUM_CUT_OFF = 0.8;
-const NOTE_UPDATE_PERIOD = 100;
+const NOTE_UPDATE_PERIOD_MS = 100;
 
 /** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */
 
@@ -201,12 +208,12 @@ export const create = (tunerCanvas) => {
     audioSource.connect(audioAnalyser);
 
     const frequencyAnalysis = new Uint8Array(audioAnalyser.frequencyBinCount);
+    const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
 
     const findHarmonicIntensities = () => {
       if (!tunerState || !tunerState.note) {
         return [];
       }
-      const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
 
       const bucketIndex = Math.floor(
         tunerState.note.frequency / frequencyBucketWidth
@@ -241,12 +248,13 @@ export const create = (tunerCanvas) => {
       return harmonicIntensities;
     };
 
+    const timeDomainBuffer = new Float32Array(audioAnalyser.fftSize);
+
     /**
      * @param {number[]} estimates
      * @param {number} testFrequencyRange
      */
     const findNote = (estimates, testFrequencyRange) => {
-      const timeDomainBuffer = new Float32Array(audioAnalyser.fftSize);
       audioAnalyser.getFloatTimeDomainData(timeDomainBuffer);
 
       const indicesToTest = new Set();
@@ -287,47 +295,46 @@ export const create = (tunerCanvas) => {
       throw new Error("Can't get canvas context");
     }
 
+    const heightMultiplier = tunerCanvas.height / 255;
+    const gradient = canvasContext.createLinearGradient(
+      0,
+      tunerCanvas.height,
+      0,
+      0
+    );
+    const colourStops = [
+      "#2f984fff",
+      "#4daf62ee",
+      "#73c378dd",
+      "#97d494cc",
+      "#b7e2b1bb",
+      "#d3eecdaa",
+      "#e8f6e399",
+      "#f7fcf588",
+    ];
+    colourStops.forEach((colour, index) => {
+      gradient.addColorStop(index / colourStops.length, colour);
+    });
+    canvasContext.save();
+
+    const maxInterestingBucket = Math.ceil(
+      MAX_INTERESTING_FREQUENCY / frequencyBucketWidth
+    );
+
+    const minInterestingBucket = Math.floor(
+      MIN_INTERESTING_FREQUENCY / frequencyBucketWidth
+    );
+
+    const bucketWidth = Math.ceil(
+      tunerCanvas.width / (maxInterestingBucket - minInterestingBucket)
+    );
+
     const drawFrequencies = () => {
-      const heightMultiplier = tunerCanvas.height / 255;
-
-      const gradient = canvasContext.createLinearGradient(
-        0,
-        tunerCanvas.height,
-        0,
-        0
-      );
-      const colourStops = [
-        "#2f984fff",
-        "#4daf62ee",
-        "#73c378dd",
-        "#97d494cc",
-        "#b7e2b1bb",
-        "#d3eecdaa",
-        "#e8f6e399",
-        "#f7fcf588",
-      ];
-      colourStops.forEach((colour, index) => {
-        gradient.addColorStop(index / colourStops.length, colour);
-      });
-
       if (!tunerState) {
         return;
       }
       canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
       audioAnalyser.getByteFrequencyData(frequencyAnalysis);
-
-      const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
-      const maxInterestingBucket = Math.ceil(
-        MAX_INTERESTING_FREQUENCY / frequencyBucketWidth
-      );
-
-      const minInterestingBucket = Math.floor(
-        MIN_INTERESTING_FREQUENCY / frequencyBucketWidth
-      );
-
-      const bucketWidth = Math.ceil(
-        tunerCanvas.width / (maxInterestingBucket - minInterestingBucket)
-      );
 
       canvasContext.save();
       canvasContext.fillStyle = "white";
@@ -358,13 +365,18 @@ export const create = (tunerCanvas) => {
       const buckets = audioAnalyser.fftSize / 2;
       const bucketWidth = maxFrequency / buckets;
 
-      const peakFrequencies = interestingPeaks.map(
-        (value) => value * bucketWidth
-      );
+      const peakFrequencies = interestingPeaks.flatMap((value) => {
+        const frequency = value * bucketWidth;
+
+        if (frequency < MIN_NOTE_FREQUENCY || frequency > MAX_NOTE_FREQUENCY) {
+          return [];
+        }
+        return frequency;
+      });
       findNote(peakFrequencies, 3);
 
       if (tunerState) {
-        tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD);
+        tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD_MS);
       }
     };
 
