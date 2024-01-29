@@ -295,28 +295,6 @@ export const create = (tunerCanvas) => {
       throw new Error("Can't get canvas context");
     }
 
-    const heightMultiplier = tunerCanvas.height / 255;
-    const gradient = canvasContext.createLinearGradient(
-      0,
-      tunerCanvas.height,
-      0,
-      0
-    );
-    const colourStops = [
-      "#2f984fff",
-      "#4daf62ee",
-      "#73c378dd",
-      "#97d494cc",
-      "#b7e2b1bb",
-      "#d3eecdaa",
-      "#e8f6e399",
-      "#f7fcf588",
-    ];
-    colourStops.forEach((colour, index) => {
-      gradient.addColorStop(index / colourStops.length, colour);
-    });
-    canvasContext.save();
-
     const maxInterestingBucket = Math.ceil(
       MAX_INTERESTING_FREQUENCY / frequencyBucketWidth
     );
@@ -337,7 +315,28 @@ export const create = (tunerCanvas) => {
       audioAnalyser.getByteFrequencyData(frequencyAnalysis);
 
       canvasContext.save();
-      canvasContext.fillStyle = "white";
+      const heightMultiplier = tunerCanvas.height / 255;
+
+      const gradient = canvasContext.createLinearGradient(
+        0,
+        tunerCanvas.height,
+        0,
+        0
+      );
+      const colourStops = [
+        "#2f984fff",
+        "#4daf62ee",
+        "#73c378dd",
+        "#97d494cc",
+        "#b7e2b1bb",
+        "#d3eecdaa",
+        "#e8f6e399",
+        "#f7fcf588",
+      ];
+      colourStops.forEach((colour, index) => {
+        gradient.addColorStop(index / colourStops.length, colour);
+      });
+
       canvasContext.fillStyle = gradient;
 
       frequencyAnalysis.forEach((magnitude, bucket) => {
