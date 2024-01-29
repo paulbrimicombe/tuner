@@ -38,8 +38,9 @@
 
 #harmonics div {
   width: 5%;
-  background: linear-gradient(to top, #2f984fff, #f7fcf588);
-  box-shadow: 0 0 3px #fff9 inset, 0 0 2px #fff;
+  /* background: linear-gradient(to top, #2f984fff, #f7fcf588); */
+  background-color: #2f984f;
+  /* box-shadow: 0 0 3px #fff9 inset, 0 0 2px #fff; */
   height: 100%;
   position: relative;
 }
@@ -57,7 +58,7 @@
   position: absolute;
   top: 0;
   background-color: #444;
-  transition: height 0.2s linear;
+  /* transition: height 0.2s linear; */
 }
 
 #harmonics div::after {
