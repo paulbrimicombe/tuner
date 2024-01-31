@@ -7,13 +7,20 @@ body {
   overflow-x: hidden;
   padding: 0 1em;
   max-width: 100vw;
-  background:
-    linear-gradient(27deg, #151515 4px, transparent 4px) 0 4px,
+  background: linear-gradient(27deg, #151515 4px, transparent 4px) 0 4px,
     linear-gradient(207deg, #151515 4px, transparent 4px) 8px 0px,
     linear-gradient(27deg, #222 4px, transparent 4px) 0px 8px,
     linear-gradient(207deg, #222 4px, transparent 4px) 8px 4px,
     linear-gradient(90deg, #1b1b1b 8px, transparent 8px),
-    linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424);
+    linear-gradient(
+      #1d1d1d 25%,
+      #1a1a1a 25%,
+      #1a1a1a 50%,
+      transparent 50%,
+      transparent 75%,
+      #242424 75%,
+      #242424
+    );
   background-color: #131313;
   background-size: 16px 16px;
 }

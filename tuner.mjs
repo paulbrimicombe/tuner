@@ -150,7 +150,10 @@ const findPeaks = (data, thresholdFactor) => {
  *   audioAnalyser: AnalyserNode,
  *   timer?: number,
  *   mediaStream: MediaStream,
- *   note: Note | null
+ *   harmonics: number[] | null,
+ *   note: Note | null,
+ *   showHarmonics: boolean,
+ *   showFrequencies: boolean
  * }} TunerState
  */
 
@@ -180,6 +183,9 @@ const createTunerState = async () => {
       sampleRate,
       mediaStream,
       note: null,
+      harmonics: null,
+      showHarmonics: true,
+      showFrequencies: true,
     };
   } catch (error) {
     audioContext.close();
@@ -284,8 +290,8 @@ export const create = (tunerCanvas) => {
 
       if (tunerState) {
         tunerState.note = note;
-        const harmonics = findHarmonicIntensities();
-        onNote(note, harmonics);
+        tunerState.harmonics = findHarmonicIntensities();
+        onNote(note, tunerState.harmonics);
       }
     };
 
@@ -307,21 +313,82 @@ export const create = (tunerCanvas) => {
       tunerCanvas.width / (maxInterestingBucket - minInterestingBucket)
     );
 
-    const drawFrequencies = () => {
+    const drawHarmonics = ({ height }) => {
+      if (!canvasContext) {
+        return;
+      }
+
+      if (!tunerState || !tunerState.note) {
+        return;
+      }
+
+      canvasContext.save();
+      const fontSize = 16;
+      const heightMultiplier = (height - fontSize) / 100;
+
+      const gradient = canvasContext.createLinearGradient(0, height, 0, 0);
+      const colourStops = [
+        "#2f984fff",
+        "#4daf62ee",
+        "#73c378dd",
+        "#97d494cc",
+        "#b7e2b1bb",
+        "#d3eecdaa",
+        "#e8f6e399",
+        "#f7fcf588",
+      ];
+      colourStops.forEach((colour, index) => {
+        gradient.addColorStop(index / colourStops.length, colour);
+      });
+
+      canvasContext.fillStyle = gradient;
+
+      const bucketPadding = 10;
+      const bucketWidth = tunerCanvas.width / 12;
+
+      canvasContext.font = `${fontSize}px system-ui`;
+      canvasContext.textAlign = "center";
+
+      tunerState.harmonics?.forEach((magnitude, bucket) => {
+        canvasContext.fillRect(
+          bucket * bucketWidth - bucketPadding / 2,
+          height - fontSize,
+          bucketWidth - bucketPadding,
+          -1 * magnitude * heightMultiplier
+        );
+        if (tunerState && tunerState?.note) {
+          const harmonicFrequency = Math.round(
+            (bucket + 1) * tunerState.note.frequency
+          );
+          canvasContext.save();
+          canvasContext.fillStyle = "white";
+          canvasContext.fillText(
+            `${harmonicFrequency} Hz`,
+            bucket * bucketWidth + 0.5 * bucketWidth - bucketPadding,
+            height
+          );
+          canvasContext.restore();
+        }
+      });
+
+      canvasContext.restore();
+    };
+
+    const drawFrequencies = ({ height = 0, yOffset = 0 }) => {
       if (!tunerState) {
         return;
       }
-      canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
+
       audioAnalyser.getByteFrequencyData(frequencyAnalysis);
 
       canvasContext.save();
-      const heightMultiplier = tunerCanvas.height / 255;
+      const heightMultiplier = height / 255;
 
       const gradient = canvasContext.createLinearGradient(
         0,
-        tunerCanvas.height,
+        height + yOffset,
         0,
-        0
+        tunerCanvas.height - height
       );
       const colourStops = [
         "#2f984fff",
@@ -345,14 +412,35 @@ export const create = (tunerCanvas) => {
         }
         canvasContext.fillRect(
           (bucket - minInterestingBucket) * bucketWidth,
-          tunerCanvas.height,
+          height + yOffset,
           bucketWidth,
           -1 * magnitude * heightMultiplier
         );
       });
 
       canvasContext.restore();
-      window.requestAnimationFrame(drawFrequencies);
+    };
+
+    const drawGraphics = () => {
+      canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
+
+      const frequencyOptions =
+        tunerState?.showFrequencies && tunerState?.showHarmonics
+          ? { height: tunerCanvas.height / 2, yOffset: tunerCanvas.height / 2 }
+          : tunerState?.showFrequencies
+          ? { height: tunerCanvas.height, yOffset: 0 }
+          : { height: 0, yOffset: 0 };
+
+      const harmonicsHeight =
+        tunerState?.showFrequencies && tunerState?.showHarmonics
+          ? tunerCanvas.height / 2
+          : tunerState?.showHarmonics
+          ? tunerCanvas.height
+          : 0;
+
+      drawFrequencies(frequencyOptions);
+      drawHarmonics({ height: harmonicsHeight });
+      window.requestAnimationFrame(drawGraphics);
     };
 
     const updateNote = () => {
@@ -379,7 +467,7 @@ export const create = (tunerCanvas) => {
       }
     };
 
-    drawFrequencies();
+    drawGraphics();
     updateNote();
   };
 
@@ -401,5 +489,15 @@ export const create = (tunerCanvas) => {
   return {
     start,
     stop,
+    setShowHarmonics: (newValue = false) => {
+      if (tunerState) {
+        tunerState.showHarmonics = newValue;
+      }
+    },
+    setShowFrequencies: (newValue = false) => {
+      if (tunerState) {
+        tunerState.showFrequencies = newValue;
+      }
+    },
   };
 };
