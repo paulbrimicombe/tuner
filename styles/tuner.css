@@ -240,11 +240,11 @@ input[type="checkbox"] {
 
 label {
   display: inline-flex;
+  flex-direction: column;
   position: relative;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   cursor: pointer;
-  height: var(--checkbox-height);
 }
 
 label::before {
@@ -256,8 +256,6 @@ label::before {
   height: var(--checkbox-height);
   background: grey;
   box-shadow: 0px 0px 3px #000 inset;
-  display: inline-block;
-  margin-right: 0.5em;
   border-radius: calc(var(--checkbox-height) / 2);
 }
 
@@ -266,6 +264,7 @@ label::after {
   pointer-events: none;
   cursor: pointer;
   position: absolute;
+  top: calc(0.5 * var(--checkbox-switch-spacing));
   left: calc(var(--checkbox-switch-spacing) / 2);
   width: calc(var(--checkbox-height) - var(--checkbox-switch-spacing));
   height: calc(var(--checkbox-height) - var(--checkbox-switch-spacing));

@@ -59,8 +59,6 @@ h1 {
   min-height: 3.5em;
   flex: 1;
   display: flex;
-  /* flex-wrap: wrap; */
-  justify-content: center;
+  justify-content: space-evenly;
   flex-direction: column;
-  gap: 1em;
 }
