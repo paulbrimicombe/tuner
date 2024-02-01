@@ -157,8 +157,11 @@ const findPeaks = (data, thresholdFactor) => {
  * }} TunerState
  */
 
-/** @returns {Promise<TunerState>} */
-const createTunerState = async () => {
+/**
+ * @param {Partial<TunerState>} initialSettings
+ * @returns {Promise<TunerState>}
+ */
+const createTunerState = async (initialSettings) => {
   const audioContext = new window.AudioContext();
 
   try {
@@ -178,14 +181,15 @@ const createTunerState = async () => {
     };
     const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     return {
-      audioContext,
-      audioAnalyser,
-      sampleRate,
-      mediaStream,
       note: null,
       harmonics: null,
       showHarmonics: true,
       showFrequencies: true,
+      ...initialSettings,
+      audioContext,
+      audioAnalyser,
+      sampleRate,
+      mediaStream,
     };
   } catch (error) {
     audioContext.close();
@@ -193,8 +197,12 @@ const createTunerState = async () => {
   }
 };
 
-/** @param {HTMLCanvasElement} tunerCanvas */
-export const create = (tunerCanvas) => {
+/** @param {{ canvas: HTMLCanvasElement, showHarmonics: boolean, showFrequencies: boolean }} options */
+export const create = ({
+  canvas: tunerCanvas,
+  showHarmonics,
+  showFrequencies,
+}) => {
   /** @type TunerState | null */
   let tunerState = null;
 
@@ -206,7 +214,10 @@ export const create = (tunerCanvas) => {
       stop();
     }
 
-    tunerState = await createTunerState();
+    tunerState = await createTunerState({
+      showFrequencies,
+      showHarmonics,
+    });
 
     const { audioContext, audioAnalyser, mediaStream, sampleRate } = tunerState;
 
@@ -323,8 +334,7 @@ export const create = (tunerCanvas) => {
       }
 
       canvasContext.save();
-      const fontSize = 16;
-      const heightMultiplier = (height - fontSize) / 100;
+      const heightMultiplier = height / 100;
 
       const gradient = canvasContext.createLinearGradient(0, height, 0, 0);
       const colourStops = [
@@ -346,29 +356,13 @@ export const create = (tunerCanvas) => {
       const bucketPadding = 10;
       const bucketWidth = tunerCanvas.width / 12;
 
-      canvasContext.font = `${fontSize}px system-ui`;
-      canvasContext.textAlign = "center";
-
       tunerState.harmonics?.forEach((magnitude, bucket) => {
         canvasContext.fillRect(
           bucket * bucketWidth - bucketPadding / 2,
-          height - fontSize,
+          height,
           bucketWidth - bucketPadding,
           -1 * magnitude * heightMultiplier
         );
-        if (tunerState && tunerState?.note) {
-          const harmonicFrequency = Math.round(
-            (bucket + 1) * tunerState.note.frequency
-          );
-          canvasContext.save();
-          canvasContext.fillStyle = "white";
-          canvasContext.fillText(
-            `${harmonicFrequency} Hz`,
-            bucket * bucketWidth + 0.5 * bucketWidth - bucketPadding,
-            height
-          );
-          canvasContext.restore();
-        }
       });
 
       canvasContext.restore();

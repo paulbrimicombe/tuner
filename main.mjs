@@ -98,16 +98,19 @@ if (!(tunerCanvas instanceof HTMLCanvasElement)) {
   throw new Error("No tuner canvas found!");
 }
 
-const tuner = Tuner.create(tunerCanvas);
+const tuner = Tuner.create({
+  canvas: tunerCanvas,
+  showHarmonics: showHarmonicsButton.checked,
+  showFrequencies: showFrequenciesButton.checked,
+});
 
 /** @type {WakeLock | null} */
 let wakeLock = null;
 
 /**
  * @param {import('./tuner.mjs').Note | null} note
- * @param {number[]} harmonics
  */
-const onNote = async (note, harmonics) => {
+const onNote = async (note) => {
   if (!wakeLock) {
     wakeLock = await requestWakeLock();
   }
@@ -167,7 +170,7 @@ const stop = () => {
     context?.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
   }, 500);
 
-  onNote(null, []);
+  onNote(null);
 };
 
 document.addEventListener("visibilitychange", () => {
