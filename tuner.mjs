@@ -7,9 +7,6 @@ const MAX_NOTE_FREQUENCY = 8_000;
 const MAX_INTERESTING_FREQUENCY = 12_000;
 const MIN_INTERESTING_FREQUENCY = 20;
 
-// When looking for note estimates
-const PEAK_VALUE_FILTER_VALUE = 0.5;
-
 const KEY_MAXIMUM_CUT_OFF = 0.8;
 const NOTE_UPDATE_PERIOD_MS = 100;
 
@@ -96,13 +93,16 @@ const Note = {
 /**
  * See http://www.cs.otago.ac.nz/tartini/papers/A_Smarter_Way_to_Find_Pitch.pdf
  * @param {number[] | Float32Array} data
- * @param {number[]} testValues
+ * @param {number} sampleRate
  */
-const correlationFunction = (data, testValues) => {
+const correlationFunction = (data, sampleRate) => {
   /** @type {number[]} */
   const nDash = new Array();
 
-  testValues.forEach((tau) => {
+  const startIndex = Math.ceil(sampleRate / MAX_NOTE_FREQUENCY);
+  const endIndex = Math.floor(sampleRate / MIN_NOTE_FREQUENCY);
+
+  for (let tau = startIndex; tau <= endIndex; tau++) {
     let rDash = 0;
     let mDash = 0;
     for (let j = 0; j < data.length - tau; j++) {
@@ -111,7 +111,7 @@ const correlationFunction = (data, testValues) => {
     }
 
     nDash[tau] = (2 * rDash) / mDash;
-  });
+  }
 
   return nDash;
 };
@@ -169,7 +169,7 @@ const createTunerState = async (initialSettings) => {
     const audioAnalyser = audioContext.createAnalyser();
     audioAnalyser.minDecibels = -100;
     audioAnalyser.maxDecibels = -10;
-    audioAnalyser.smoothingTimeConstant = 0.85;
+    audioAnalyser.smoothingTimeConstant = 0.8;
     audioAnalyser.fftSize = 4096;
 
     const constraints = {
@@ -220,12 +220,13 @@ export const create = ({
     });
 
     const { audioContext, audioAnalyser, mediaStream, sampleRate } = tunerState;
+    const maxFrequency = sampleRate / 2;
 
     const audioSource = audioContext.createMediaStreamSource(mediaStream);
     audioSource.connect(audioAnalyser);
 
     const frequencyAnalysis = new Uint8Array(audioAnalyser.frequencyBinCount);
-    const frequencyBucketWidth = sampleRate / 2 / frequencyAnalysis.length;
+    const frequencyBucketWidth = maxFrequency / frequencyAnalysis.length;
 
     const findHarmonicIntensities = () => {
       if (!tunerState || !tunerState.note) {
@@ -267,34 +268,12 @@ export const create = ({
 
     const timeDomainBuffer = new Float32Array(audioAnalyser.fftSize);
 
-    /**
-     * @param {number[]} estimates
-     * @param {number} testFrequencyRange
-     */
-    const findNote = (estimates, testFrequencyRange) => {
+    const findNote = () => {
       audioAnalyser.getFloatTimeDomainData(timeDomainBuffer);
-
-      const indicesToTest = new Set();
-      estimates.forEach((frequency) => {
-        const startOffset = Math.max(
-          Math.floor(sampleRate / frequency) - testFrequencyRange,
-          0
-        );
-        const endOffset = Math.min(
-          Math.ceil(sampleRate / frequency) + testFrequencyRange,
-          sampleRate / 2
-        );
-        for (let i = startOffset; i <= endOffset; i++) {
-          indicesToTest.add(i);
-        }
-      });
-
-      const correlation = correlationFunction(timeDomainBuffer, [
-        ...indicesToTest,
-      ]);
+      const correlation = correlationFunction(timeDomainBuffer, sampleRate);
 
       const keyMaxima = findPeaks(correlation, KEY_MAXIMUM_CUT_OFF).filter(
-        (maximum) => maximum > 0
+        (maximum) => maximum >= KEY_MAXIMUM_CUT_OFF
       );
       const frequency = keyMaxima[0] ? sampleRate / keyMaxima[0] : null;
       const note = Note.create(frequency);
@@ -353,12 +332,12 @@ export const create = ({
 
       canvasContext.fillStyle = gradient;
 
-      const bucketPadding = 10;
+      const bucketPadding = 20;
       const bucketWidth = tunerCanvas.width / 12;
 
       tunerState.harmonics?.forEach((magnitude, bucket) => {
         canvasContext.fillRect(
-          bucket * bucketWidth - bucketPadding / 2,
+          bucket * bucketWidth + bucketPadding / 2,
           height,
           bucketWidth - bucketPadding,
           -1 * magnitude * heightMultiplier
@@ -438,23 +417,7 @@ export const create = ({
     };
 
     const updateNote = () => {
-      const interestingPeaks = findPeaks(
-        frequencyAnalysis,
-        PEAK_VALUE_FILTER_VALUE
-      );
-      const maxFrequency = sampleRate / 2;
-      const buckets = audioAnalyser.fftSize / 2;
-      const bucketWidth = maxFrequency / buckets;
-
-      const peakFrequencies = interestingPeaks.flatMap((value) => {
-        const frequency = value * bucketWidth;
-
-        if (frequency < MIN_NOTE_FREQUENCY || frequency > MAX_NOTE_FREQUENCY) {
-          return [];
-        }
-        return frequency;
-      });
-      findNote(peakFrequencies, 3);
+      findNote();
 
       if (tunerState) {
         tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD_MS);
