@@ -9,7 +9,7 @@ const MAX_INTERESTING_FREQUENCY = 12_000;
 const MIN_INTERESTING_FREQUENCY = 20;
 
 const KEY_MAXIMUM_CUT_OFF = 0.8;
-const NOTE_UPDATE_PERIOD_MS = 1_000;
+const NOTE_UPDATE_PERIOD_MS = 100;
 
 /** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */
 
@@ -467,7 +467,7 @@ export const create = ({ canvas: tunerCanvas }) => {
       findNote();
 
       if (tunerState) {
-        tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD_MS);
+        // tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD_MS);
       }
     };
 
