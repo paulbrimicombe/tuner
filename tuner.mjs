@@ -1,20 +1,21 @@
 // @ts-check
 
-const MIN_NOTE_FREQUENCY = 27;
+// const MIN_NOTE_FREQUENCY = 27;
+const MIN_NOTE_FREQUENCY = 25;
 const MAX_NOTE_FREQUENCY = 8_000;
 
 // For graphing purposes
 const MAX_INTERESTING_FREQUENCY = 12_000;
 const MIN_INTERESTING_FREQUENCY = 20;
 
-const KEY_MAXIMUM_CUT_OFF = 0.8;
+const KEY_MAXIMUM_CUT_OFF = 0.5;
 const NOTE_UPDATE_PERIOD_MS = 100;
 
 /** @typedef {{noteString: string, octaveNumber: number, midiNumber: number, frequency: number, error: number}} Note */
 
 /**
- * @param {number[] | Uint8Array} data
- * @param {number} index
+ * @param {number[] | Uint8Array | Float32Array} data
+ * @returns {[number, number]}
  */
 const interpolateMax = (data, index) => {
   const y1 = data[index - 1];
@@ -23,17 +24,10 @@ const interpolateMax = (data, index) => {
 
   const a = (y1 + y3 - 2 * y2) / 2;
   const b = (y3 - y1) / 2;
-  const peak = index - b / (2 * a);
-  return peak;
-};
+  const peakX = index - b / (2 * a);
+  const peakY = y2 - (peakX - index) * (peakX - index) * a;
 
-/**
- * @param {number[] | Uint8Array} data
- * @returns {number}
- */
-const findMaxValue = (data) => {
-  // @ts-ignore
-  return data.reduce((max, value) => (value > max ? value : max), 0);
+  return [peakX, peakY];
 };
 
 const Note = {
@@ -92,32 +86,32 @@ const Note = {
 
 /**
  * See http://www.cs.otago.ac.nz/tartini/papers/A_Smarter_Way_to_Find_Pitch.pdf
+ * @param {Float32Array} nDash the array where results are stored
  * @param {number[] | Float32Array} data
  * @param {number} sampleRate
  */
-const correlationFunction = (data, sampleRate) => {
-  /** @type {number[]} */
-  const nDash = new Array();
-
+const correlationFunction = (nDash, data, sampleRate) => {
   const startIndex = Math.ceil(sampleRate / MAX_NOTE_FREQUENCY);
   const endIndex = Math.floor(sampleRate / MIN_NOTE_FREQUENCY);
 
-  for (let tau = startIndex; tau <= endIndex; tau++) {
-    let rDash = 0;
-    let mDash = 0;
-    for (let j = 0; j < data.length - tau; j++) {
-      rDash += data[j] * data[j + tau];
-      mDash += Math.pow(data[j], 2) + Math.pow(data[j + tau], 2);
+  for (let tau = 0; tau < nDash.length; tau++) {
+    if (tau < startIndex || tau > endIndex) {
+      nDash[tau] = 0;
+    } else {
+      let rDash = 0;
+      let mDash = 0;
+      for (let j = 0; j < data.length - tau; j++) {
+        rDash += data[j] * data[j + tau];
+        mDash += Math.pow(data[j], 2) + Math.pow(data[j + tau], 2);
+      }
+
+      nDash[tau] = (2 * rDash) / mDash;
     }
-
-    nDash[tau] = (2 * rDash) / mDash;
   }
-
-  return nDash;
 };
 
 /**
- * @param {Uint8Array | number[]} data
+ * @param {Float32Array} data
  * @returns {number[]}
  */
 const findPeaks = (data, thresholdFactor) => {
@@ -125,23 +119,48 @@ const findPeaks = (data, thresholdFactor) => {
     return (data[index - 1] + value + data[index + 1]) / 3;
   });
 
-  const maxValue = findMaxValue(averagedData);
-  const threshold = thresholdFactor * maxValue;
+  let maxValue = 0;
+  const positiveSlopeStarts = [];
 
-  // @ts-ignore
-  return averagedData.reduce((peaks, value, index) => {
-    // Assume the data is fairly smooth when identifying peaks
-    if (
-      value > threshold &&
-      averagedData[index - 1] <= value &&
-      averagedData[index + 1] <= value
-    ) {
-      const peakValue = interpolateMax(averagedData, index);
-      return [...peaks, peakValue];
-    } else {
-      return peaks;
+  const maximumPoints = averagedData.reduce((maximumPoints, value, index) => {
+    if (averagedData[index - 1] < 0 && value >= 0) {
+      positiveSlopeStarts.push(index);
     }
+
+    if (positiveSlopeStarts.length) {
+      if (
+        value > 0 &&
+        averagedData[index - 1] <= value &&
+        averagedData[index + 1] <= value
+      ) {
+        const [peakX, peakY] = interpolateMax(averagedData, index);
+        maximumPoints[maximumPoints.length] = [peakX, peakY];
+
+        if (peakY > maxValue) {
+          maxValue = peakY;
+        }
+      }
+    }
+    return maximumPoints;
   }, []);
+
+  const threshold = maxValue * thresholdFactor;
+  const results = [];
+
+  positiveSlopeStarts.forEach((slopeStartIndex, index) => {
+    const nextSlopeStart = positiveSlopeStarts[index + 1] ?? data.length;
+
+    const matchingPoints = maximumPoints.filter(
+      ([x]) => x >= slopeStartIndex && x < nextSlopeStart
+    );
+
+    const highestPoint = matchingPoints.sort(([, a], [, b]) => b - a)[0];
+    if (highestPoint?.[1] > threshold) {
+      results.push(highestPoint[0]);
+    }
+  });
+
+  return results;
 };
 
 /** @typedef {{
@@ -169,7 +188,7 @@ const createTunerState = async (initialSettings) => {
     const audioAnalyser = audioContext.createAnalyser();
     audioAnalyser.minDecibels = -100;
     audioAnalyser.maxDecibels = -10;
-    audioAnalyser.smoothingTimeConstant = 0.8;
+    audioAnalyser.smoothingTimeConstant = 0.85;
     audioAnalyser.fftSize = 4096;
 
     const constraints = {
@@ -267,14 +286,46 @@ export const create = ({
     };
 
     const timeDomainBuffer = new Float32Array(audioAnalyser.fftSize);
+    const correlationResults = new Float32Array(audioAnalyser.fftSize);
+
+    const drawCorrelationResults = (keyMaxima = []) => {
+      canvasContext.save();
+      canvasContext.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
+
+      const heightMultiplier = tunerCanvas.height / 2;
+      canvasContext.fillStyle = "white";
+
+      correlationResults.forEach((magnitude, index) => {
+        canvasContext.fillRect(
+          (2 * index * tunerCanvas.width) / correlationResults.length,
+          tunerCanvas.height / 2,
+          tunerCanvas.width / correlationResults.length,
+          -1 * magnitude * heightMultiplier
+        );
+      });
+
+      canvasContext.fillStyle = "hotpink";
+      keyMaxima.forEach((maximum) => {
+        canvasContext.fillRect(
+          (2 * maximum * tunerCanvas.width) / correlationResults.length,
+          tunerCanvas.height,
+          2,
+          -2 * heightMultiplier
+        );
+      });
+
+      canvasContext.restore();
+    };
 
     const findNote = () => {
       audioAnalyser.getFloatTimeDomainData(timeDomainBuffer);
-      const correlation = correlationFunction(timeDomainBuffer, sampleRate);
+      correlationFunction(correlationResults, timeDomainBuffer, sampleRate);
 
-      const keyMaxima = findPeaks(correlation, KEY_MAXIMUM_CUT_OFF).filter(
-        (maximum) => maximum >= KEY_MAXIMUM_CUT_OFF
-      );
+      const keyMaxima = findPeaks(
+        correlationResults,
+        KEY_MAXIMUM_CUT_OFF
+      ).filter((maximum) => maximum >= 0);
+
       const frequency = keyMaxima[0] ? sampleRate / keyMaxima[0] : null;
       const note = Note.create(frequency);
 
