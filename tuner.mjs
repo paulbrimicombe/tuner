@@ -188,7 +188,7 @@ const createTunerState = async (initialSettings = {}) => {
     const audioAnalyser = audioContext.createAnalyser();
     audioAnalyser.minDecibels = -100;
     audioAnalyser.maxDecibels = -10;
-    audioAnalyser.smoothingTimeConstant = 0.85;
+    audioAnalyser.smoothingTimeConstant = 0.9;
     audioAnalyser.fftSize = 4096;
 
     const constraints = {
@@ -327,7 +327,7 @@ export const create = ({ canvas: tunerCanvas }) => {
 
       if (tunerState) {
         tunerState.note = note;
-        // tunerState.harmonics = findHarmonicIntensities();
+        tunerState.harmonics = findHarmonicIntensities();
         onNote(note, tunerState.harmonics);
       }
     };
@@ -467,7 +467,7 @@ export const create = ({ canvas: tunerCanvas }) => {
       findNote();
 
       if (tunerState) {
-        // tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD_MS);
+        tunerState.timer = setTimeout(updateNote, NOTE_UPDATE_PERIOD_MS);
       }
     };
 
