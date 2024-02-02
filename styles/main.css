@@ -23,6 +23,7 @@ body {
     );
   background-color: #131313;
   background-size: 16px 16px;
+  font-size: clamp(0.5rem, min(1vw, 1vh) + 0.7rem, 1.5rem);
 }
 
 a {
@@ -56,15 +57,11 @@ h1 {
 
 .header {
   max-height: 15vh;
-  flex: 0;
+  flex: 0.3;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   padding: 0.3em 0;
-}
-
-.header h1 {
-  margin-right: 1em;
-  flex: 1;
 }
