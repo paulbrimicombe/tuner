@@ -100,8 +100,6 @@ if (!(tunerCanvas instanceof HTMLCanvasElement)) {
 
 const tuner = Tuner.create({
   canvas: tunerCanvas,
-  showHarmonics: showHarmonicsButton.checked,
-  showFrequencies: showFrequenciesButton.checked,
 });
 
 /** @type {WakeLock | null} */
@@ -156,7 +154,11 @@ const onNote = async (note) => {
 const start = async () => {
   wakeLock?.release();
   wakeLock = await requestWakeLock();
-  tuner.start(onNote);
+  tuner.start({
+    onNote,
+    showHarmonics: showHarmonicsButton.checked,
+    showFrequencies: showFrequenciesButton.checked,
+  });
   tunerCanvas.classList.remove("hidden");
 };
 

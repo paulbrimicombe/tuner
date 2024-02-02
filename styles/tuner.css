@@ -1,8 +1,6 @@
 .graph {
   flex: 2;
-  max-height: 40vh;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  min-height: calc(45vh - 1.5em);
   width: 100%;
   border-radius: 1em;
   position: relative;
@@ -56,14 +54,14 @@ canvas#graphics {
   background: radial-gradient(#2a2e2c, #606763);
   box-shadow: 0px 0px 5px #000 inset;
   display: flex;
-  max-height: 40vh;
+  min-height: calc(40vh - 0.5em);
   flex: 2;
   border-radius: 1em;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-  min-height: max(40vh, 10em);
   padding: 0.3em 0 0.3em 0;
+  margin-bottom: 0.5em;
 }
 
 #note {
@@ -221,9 +219,10 @@ canvas#graphics {
 }
 
 form {
-  --checkbox-width: 3.5em;
-  --checkbox-height: 2em;
+  --checkbox-width: 3em;
+  --checkbox-height: 1.8em;
   --checkbox-switch-spacing: 5px;
+  flex: 1;
 }
 
 .checkbox-container {
@@ -236,6 +235,7 @@ input[type="checkbox"] {
   width: var(--checkbox-width);
   display: inline;
   position: absolute;
+  opacity: 0;
 }
 
 label {
@@ -245,6 +245,7 @@ label {
   align-items: flex-start;
   justify-content: center;
   cursor: pointer;
+  font-size: 0.8em;
 }
 
 label::before {
@@ -284,4 +285,12 @@ input:checked + label::after {
     var(--checkbox-switch-spacing) / 2 + var(--checkbox-width) -
       var(--checkbox-height)
   );
+}
+
+footer {
+  height: 1.5em;
+  max-height: 1.5em;
+  font-size: 0.8em;
+  line-height: 1em;
+  padding-left: 0.5em;
 }

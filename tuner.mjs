@@ -180,7 +180,7 @@ const findPeaks = (data, thresholdFactor) => {
  * @param {Partial<TunerState>} initialSettings
  * @returns {Promise<TunerState>}
  */
-const createTunerState = async (initialSettings) => {
+const createTunerState = async (initialSettings = {}) => {
   const audioContext = new window.AudioContext();
 
   try {
@@ -216,19 +216,15 @@ const createTunerState = async (initialSettings) => {
   }
 };
 
-/** @param {{ canvas: HTMLCanvasElement, showHarmonics: boolean, showFrequencies: boolean }} options */
-export const create = ({
-  canvas: tunerCanvas,
-  showHarmonics,
-  showFrequencies,
-}) => {
+/** @param {{ canvas: HTMLCanvasElement }} options */
+export const create = ({ canvas: tunerCanvas }) => {
   /** @type TunerState | null */
   let tunerState = null;
 
   /**
-   * @param {(note: Note | null, harmonics: number[]) => void} onNote
+   * @param {{ onNote: (note: Note | null, harmonics: number[]) => void, showHarmonics: boolean, showFrequencies: boolean }} settings
    */
-  const start = async (onNote) => {
+  const start = async ({ onNote, showHarmonics, showFrequencies }) => {
     if (tunerState) {
       stop();
     }
