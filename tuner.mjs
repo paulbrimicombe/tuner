@@ -327,7 +327,7 @@ export const create = ({ canvas: tunerCanvas }) => {
 
       if (tunerState) {
         tunerState.note = note;
-        tunerState.harmonics = findHarmonicIntensities();
+        // tunerState.harmonics = findHarmonicIntensities();
         onNote(note, tunerState.harmonics);
       }
     };
