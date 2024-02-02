@@ -1,4 +1,4 @@
-const CACHE_STORAGE_KEY = "tuner-v1.0.43";
+const CACHE_STORAGE_KEY = "tuner-v1.0.44";
 
 const cachedPaths = [
   "./",
@@ -14,7 +14,7 @@ const cachedPaths = [
   "./styles/main.css",
   "./styles/reset.css",
   "./styles/tuner.css",
-];  
+];
 
 self.oninstall = (event) => {
   event.waitUntil(
